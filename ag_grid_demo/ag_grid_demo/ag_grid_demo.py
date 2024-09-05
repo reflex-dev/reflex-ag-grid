@@ -25,6 +25,9 @@ data = [
     {"make": "Toyota", "model": "Celica", "price": 35000},
     {"make": "Ford", "model": "Mondeo", "price": 32000},
     {"make": "Porsche", "model": "Boxster", "price": 72000},
+    {"make": "Toyota", "model": "Celica", "price": 35000},
+    {"make": "Ford", "model": "Mondeo", "price": 32000},
+    {"make": "Porsche", "model": "Boxster", "price": 72000},
 ]
 
 
@@ -36,8 +39,8 @@ def index():
                 row_data=data,
                 column_defs=columns,
             ),
-            width="50vw",
-            height="50vh",
+            width="30vw",
+            height="30vh",
         ),
         height="100vh",
         align="center",
