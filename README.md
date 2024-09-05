@@ -2,6 +2,8 @@
 
 This package provides a Reflex component wrapping the AGGrid library.
 
+<img src="aggrid_preview.png" width="500px">
+
 > [!WARNING]
 > As it is a WorkInProgress (WIP), only some parts of the AGGrid library features are wrapped, but it should be enough for most use cases.
 
