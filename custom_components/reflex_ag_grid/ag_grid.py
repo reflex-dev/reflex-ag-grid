@@ -41,8 +41,11 @@ class AgGrid(rx.Component):
     groupDefaultExpanded: rx.Var[int] | None = -1
     groupSelectsChildren: rx.Var[bool] = False
     suppressRowClickSelection: rx.Var[bool] = False
-    rowSelection: rx.Var[str] = "single"
-    animateRows: rx.Var[bool] = False
+    row_selection: rx.Var[str] = "single"
+    animate_rows: rx.Var[bool] = False
+    pagination: rx.Var[bool] = False
+    pagination_page_size: rx.Var[int] = 100
+    pagination_page_size_selector: rx.Var[list[int]] = [10, 25, 50]
     getDataPath: rx.EventHandler[lambda e0: [e0]]
     sideBar: rx.Var[str | dict[str, Any] | bool | list[str]] = ""
     groupAllowUnbalanced: rx.Var[bool] = False
