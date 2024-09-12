@@ -34,6 +34,18 @@ class AGFilters(SimpleNamespace):
     text = "agTextColumnFilter"
     number = "agNumberColumnFilter"
     date = "agDateColumnFilter"
+    set = "agSetColumnFilter"
+    multi = "agMultiColumnFilter"
+
+
+class AGEditors(SimpleNamespace):
+    text = "agTextCellEditor"
+    large_text = "agLargeTextCellEditor"
+    select = "agSelectCellEditor"
+    rich_select = "agRichSelectCellEditor"
+    number = "agNumberCellEditor"
+    date = "agDateCellEditor"
+    checkbox = "agCheckboxCellEditor"
 
 
 class ColumnDef(PropsBase):
@@ -45,8 +57,11 @@ class ColumnDef(PropsBase):
     editable: bool | None = False
     filter: AGFilters | str | None = None
     floating_filter: bool = False
-    header_name: str
-    header_tooltip: str | None
+    header_name: str | None = None
+    header_tooltip: str | None = None
+    checkbox_selection: bool | None = False
+    cell_editor: AGEditors | str | None = None
+    cell_editor_params: dict[str, list[Any]] | None = None
 
 
 class ColumnGroup(PropsBase):
@@ -75,7 +90,7 @@ class AgGrid(rx.Component):
     row_selection: rx.Var[str] = "single"
     animate_rows: rx.Var[bool] = False
     pagination: rx.Var[bool] = False
-    pagination_page_size: rx.Var[int] = 100
+    pagination_page_size: rx.Var[int] = 10
     pagination_page_size_selector: rx.Var[list[int]] = [10, 25, 50]
     get_data_path: rx.EventHandler[lambda e0: [e0]]
     side_bar: rx.Var[str | dict[str, Any] | bool | list[str]] = ""
@@ -283,6 +298,7 @@ class AgGridNamespace(rx.ComponentNamespace):
     column_def = ColumnDef
     column_group = ColumnGroup
     filters = AGFilters
+    editors = AGEditors
     __call__ = AgGrid.create
 
 
