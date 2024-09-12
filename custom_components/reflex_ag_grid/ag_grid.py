@@ -2,11 +2,14 @@
 
 # For wrapping react guide, visit https://reflex.dev/docs/wrapping-react/overview/
 
+from types import SimpleNamespace
 import reflex as rx
 
 import os
 from typing import Any
 from .datasource import Datasource, SSRMDatasource
+from reflex.components.props import PropsBase
+from typing import Literal
 
 
 def _on_ag_grid_event(event: rx.Var) -> list[rx.Var]:
@@ -27,59 +30,104 @@ def _on_selection_change_signature(event: rx.Var) -> list[rx.Var]:
     ]
 
 
+class AGFilters(SimpleNamespace):
+    text = "agTextColumnFilter"
+    number = "agNumberColumnFilter"
+    date = "agDateColumnFilter"
+    set = "agSetColumnFilter"
+    multi = "agMultiColumnFilter"
+
+
+class AGEditors(SimpleNamespace):
+    text = "agTextCellEditor"
+    large_text = "agLargeTextCellEditor"
+    select = "agSelectCellEditor"
+    rich_select = "agRichSelectCellEditor"
+    number = "agNumberCellEditor"
+    date = "agDateCellEditor"
+    checkbox = "agCheckboxCellEditor"
+
+
+class ColumnDef(PropsBase):
+    field: str
+    col_id: str | None = None
+    type: str | None = None
+    cell_data_type: bool | str | None = None
+    hide: bool = False
+    editable: bool | None = False
+    filter: AGFilters | str | None = None
+    floating_filter: bool = False
+    header_name: str | None = None
+    header_tooltip: str | None = None
+    checkbox_selection: bool | None = False
+    cell_editor: AGEditors | str | None = None
+    cell_editor_params: dict[str, list[Any]] | None = None
+
+
+class ColumnGroup(PropsBase):
+    children: list["ColumnDef | ColumnGroup"]
+    group_id: str
+    marry_children: bool = False
+    open_by_default: bool = False
+    column_group_show: Literal["open", "closed"] = "open"
+    header_name: str
+
+
 class AgGrid(rx.Component):
     library: str = "ag-grid-react"
     tag: str = "AgGridReact"
 
-    getRowId: rx.EventHandler[lambda e0: [e0]]
-    column_defs: rx.Var[list[dict[str, Any]]]
+    get_row_id: rx.EventHandler[lambda e0: [e0]]
+    column_defs: rx.Var[list[dict[str, Any] | ColumnDef | ColumnGroup]]
     row_data: rx.Var[list[dict[str, Any]]]
-    treeData: rx.Var[bool] = rx.Var.create_safe(False)
-    defaultColDef: rx.Var[dict[str, Any]] = {}
-    autoGroupColumnDef: rx.Var[Any] = {}
-    pinnedBottomRowData: rx.Var[list[dict[str, Any]]] = []
-    groupDefaultExpanded: rx.Var[int] | None = -1
-    groupSelectsChildren: rx.Var[bool] = False
-    suppressRowClickSelection: rx.Var[bool] = False
+    tree_data: rx.Var[bool] = rx.Var.create_safe(False)
+    default_col_def: rx.Var[dict[str, Any]] = {}
+    auto_group_column_def: rx.Var[Any] = {}
+    pinned_bottom_row_data: rx.Var[list[dict[str, Any]]] = []
+    group_default_expanded: rx.Var[int] | None = -1
+    group_selects_children: rx.Var[bool] = False
+    suppress_row_click_selection: rx.Var[bool] = False
     row_selection: rx.Var[str] = "single"
     animate_rows: rx.Var[bool] = False
     pagination: rx.Var[bool] = False
-    pagination_page_size: rx.Var[int] = 100
+    pagination_page_size: rx.Var[int] = 10
     pagination_page_size_selector: rx.Var[list[int]] = [10, 25, 50]
-    getDataPath: rx.EventHandler[lambda e0: [e0]]
-    sideBar: rx.Var[str | dict[str, Any] | bool | list[str]] = ""
-    groupAllowUnbalanced: rx.Var[bool] = False
-    pivotPanelShow: rx.Var[str] = "never"
-    rowGroupPanelShow: rx.Var[str] = "never"
-    suppressAggFuncInHeader: rx.Var[bool] = False
-    groupLockGroupColumns: rx.Var[int] = 0
-    maintainColumnOrder: rx.Var[bool] = False
+    get_data_path: rx.EventHandler[lambda e0: [e0]]
+    side_bar: rx.Var[str | dict[str, Any] | bool | list[str]] = ""
+    group_allow_unbalanced: rx.Var[bool] = False
+    pivot_panel_show: rx.Var[str] = "never"
+    row_group_panel_show: rx.Var[str] = "never"
+    suppress_agg_func_in_header: rx.Var[bool] = False
+    group_lock_group_columns: rx.Var[int] = 0
+    maintain_column_order: rx.Var[bool] = False
 
     # infinite/serverside row model
-    rowModelType: rx.Var[str]
-    cacheBlockSize: rx.Var[int]
-    maxBlocksInCache: rx.Var[int]
-    rowBuffer: rx.Var[int]
-    cacheOverflowSize: rx.Var[int]
-    maxConcurrentDatasourceRequests: rx.Var[int]
-    infiniteInitialRowCount: rx.Var[int]
+    row_model_type: rx.Var[str]
+    cache_block_size: rx.Var[int]
+    max_blocks_in_cache: rx.Var[int]
+    row_buffer: rx.Var[int]
+    cache_overflow_size: rx.Var[int]
+    max_concurrent_datasource_requests: rx.Var[int]
+    infinite_initial_row_count: rx.Var[int]
     datasource: rx.Var[Datasource]
-    isServerSideGroup: rx.EventHandler[lambda e0: [e0]]
-    getServerSideGroupKey: rx.EventHandler[lambda e0: [e0]]
-    serverSideDatasource: rx.Var[SSRMDatasource]
-    isServerSideGroupOpenByDefault: rx.EventHandler[lambda e0: [e0]]
-    serverSideEnableClientSideSort: rx.Var[bool] = False
-    getChildCount: rx.EventHandler[lambda e0: [e0]]
+    is_server_side_group: rx.EventHandler[lambda e0: [e0]]
+    get_server_side_group_key: rx.EventHandler[lambda e0: [e0]]
+    server_side_datasource: rx.Var[SSRMDatasource]
+    is_server_side_group_open_by_default: rx.EventHandler[lambda e0: [e0]]
+    server_side_enable_client_side_sort: rx.Var[bool] = False
+    get_child_count: rx.EventHandler[lambda e0: [e0]]
 
     # selection events
-    onCellClicked: rx.EventHandler[_on_ag_grid_event]
-    onSelectionChanged: rx.EventHandler[_on_selection_change_signature]
-    onFirstDataRendered: rx.EventHandler[_on_ag_grid_event]
+    on_cell_clicked: rx.EventHandler[_on_ag_grid_event]
+    on_selection_changed: rx.EventHandler[_on_selection_change_signature]
+    on_first_data_rendered: rx.EventHandler[_on_ag_grid_event]
 
     lib_dependencies: list[str] = [
         "ag-grid-community",
         "ag-grid-enterprise",
     ]
+
+    theme: rx.Var[Literal["quartz", "balham", "alpine", "material"]]
 
     @classmethod
     def create(
@@ -87,50 +135,58 @@ class AgGrid(rx.Component):
         *children,
         id: str,
         data_path_key: str | None = None,
-        isServerSideGroupKey: str | None = None,
-        getServerSideGroupKey: str | None = None,
-        serverSideGroupOpenLevel: int | None = None,
-        childCountKey: str | None = None,
-        rowIdKey: str | None = None,
+        is_server_side_group_key: str | None = None,
+        get_server_side_group_key: str | None = None,
+        server_side_group_open_level: int | None = None,
+        child_count_key: str | None = None,
+        row_id_key: str | None = None,
         **props,
     ) -> rx.Component:
         props.setdefault("id", id)
 
         # handle hierarchical data
         if data_path_key is not None:
-            props["getDataPath"] = rx.Var.create_safe(
+            props["get_data_path"] = rx.Var.create_safe(
                 f"(data) => data.{data_path_key}", _var_is_string=False
             ).to(rx.EventChain)
 
-        if isServerSideGroupKey is not None:
-            props["isServerSideGroup"] = rx.Var.create_safe(
-                f"(data) => data.{isServerSideGroupKey}", _var_is_string=False
+        if is_server_side_group_key is not None:
+            props["is_server_side_group"] = rx.Var.create_safe(
+                f"(data) => data.{is_server_side_group_key}", _var_is_string=False
             ).to(rx.EventChain)
 
-        if getServerSideGroupKey is not None:
-            props["getServerSideGroupKey"] = rx.Var.create_safe(
-                f"(data) => data.{getServerSideGroupKey}", _var_is_string=False
+        if get_server_side_group_key is not None:
+            props["get_server_side_group_key"] = rx.Var.create_safe(
+                f"(data) => data.{get_server_side_group_key}", _var_is_string=False
             ).to(rx.EventChain)
 
-        if serverSideGroupOpenLevel is not None:
-            props["isServerSideGroupOpenByDefault"] = rx.Var.create_safe(
-                f"(params) => params.rowNode.level < {serverSideGroupOpenLevel}",
+        if server_side_group_open_level is not None:
+            props["server_side_group_open_level"] = rx.Var.create_safe(
+                f"(params) => params.rowNode.level < {server_side_group_open_level}",
                 _var_is_string=False,
             ).to(rx.EventChain)
 
-        if childCountKey is not None:
-            props["getChildCount"] = rx.Var.create_safe(
-                f"(data) => data ? data.{childCountKey} : undefined",
+        if child_count_key is not None:
+            props["get_child_count"] = rx.Var.create_safe(
+                f"(data) => data ? data.{child_count_key} : undefined",
                 _var_is_string=False,
             ).to(rx.EventChain)
 
-        if rowIdKey is not None:
-            props["getRowId"] = rx.Var.create_safe(
-                f"(params) => params.data.{rowIdKey}", _var_is_string=False
+        if row_id_key is not None:
+            props["get_row_id"] = rx.Var.create_safe(
+                f"(params) => params.data.{row_id_key}", _var_is_string=False
             ).to(rx.EventChain)
 
-        props["class_name"] = rx.color_mode_cond(
-            "ag-theme-quartz", "ag-theme-quartz-dark"
+        props["class_name"] = rx.match(
+            props.get("theme", "quartz"),
+            ("quartz", rx.color_mode_cond("ag-theme-quartz", "ag-theme-quartz-dark")),
+            ("balham", rx.color_mode_cond("ag-theme-balham", "ag-theme-balham-dark")),
+            ("alpine", rx.color_mode_cond("ag-theme-alpine", "ag-theme-alpine-dark")),
+            (
+                "material",
+                rx.color_mode_cond("ag-theme-material", "ag-theme-material-dark"),
+            ),
+            "",
         )
 
         return super().create(*children, **props)
@@ -139,7 +195,6 @@ class AgGrid(rx.Component):
         return {
             "": [
                 "ag-grid-community/styles/ag-grid.css",
-                "ag-grid-community/styles/ag-theme-quartz.css",
                 "ag-grid-community/styles/ag-theme-quartz.css",
                 "ag-grid-community/styles/ag-theme-balham.css",
                 "ag-grid-community/styles/ag-theme-material.css",
@@ -223,7 +278,7 @@ api.forEachNode(function (node) {{
             f"refs['{self.get_ref()}']?.current?.api.showLoadingOverlay()",
         )
 
-    def show_now_rows_overlay(self) -> rx.event.EventSpec:
+    def show_no_rows_overlay(self) -> rx.event.EventSpec:
         return rx.call_script(
             f"refs['{self.get_ref()}']?.current?.api.showNoRowsOverlay()",
         )
@@ -239,4 +294,12 @@ api.forEachNode(function (node) {{
         )
 
 
-ag_grid = AgGrid.create
+class AgGridNamespace(rx.ComponentNamespace):
+    column_def = ColumnDef
+    column_group = ColumnGroup
+    filters = AGFilters
+    editors = AGEditors
+    __call__ = AgGrid.create
+
+
+ag_grid = AgGridNamespace()

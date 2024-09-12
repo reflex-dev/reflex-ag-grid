@@ -4,7 +4,7 @@ from rxconfig import config
 
 import reflex as rx
 
-from reflex_ag_grid import ag_grid
+from reflex_ag_grid import ag_grid, ColumnDef, AGFilters
 
 filename = f"{config.app_name}/{config.app_name}.py"
 
@@ -16,9 +16,24 @@ class State(rx.State):
 
 
 columns = [
-    {"filter": "agTextColumnFilter", "field": "make"},
-    {"filter": "agTextColumnFilter", "field": "model"},
-    {"filter": "agNumberColumnFilter", "field": "price"},
+    ag_grid.column_def(
+        header_name="Make",
+        field="make",
+        filter=ag_grid.filters.text,
+        editable=True,
+    ),
+    ag_grid.column_def(
+        header_name="Model",
+        field="model",
+        filter=ag_grid.filters.text,
+    ),
+    ag_grid.column_def(
+        **{
+            "header_name": "Price",
+            "field": "price",
+            "filter": ag_grid.filters.number,
+        }  # type: ignore
+    ),
 ]
 
 data = [
@@ -38,6 +53,7 @@ def index():
                 id="grid_1",
                 row_data=data,
                 column_defs=columns,
+                theme="balham",
             ),
             width="30vw",
             height="30vh",
