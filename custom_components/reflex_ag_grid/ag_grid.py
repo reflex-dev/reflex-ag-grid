@@ -10,6 +10,7 @@ from typing import Any
 from .datasource import Datasource, SSRMDatasource
 from reflex.components.props import PropsBase
 from typing import Literal
+from reflex.components.el import Div
 
 
 def _on_ag_grid_event(event: rx.Var) -> list[rx.Var]:
@@ -294,12 +295,25 @@ api.forEachNode(function (node) {{
         )
 
 
+class WrappedAgGrid(AgGrid):
+    @classmethod
+    def create(cls, *children, **props):
+        width = props.pop("width", None)
+        height = props.pop("height", None)
+        return Div.create(
+            super().create(*children, **props),
+            width=width or "40vw",
+            height=height or "25vh",
+        )
+
+
 class AgGridNamespace(rx.ComponentNamespace):
     column_def = ColumnDef
     column_group = ColumnGroup
     filters = AGFilters
     editors = AGEditors
-    __call__ = AgGrid.create
+    root = AgGrid.create
+    __call__ = WrappedAgGrid.create
 
 
 ag_grid = AgGridNamespace()

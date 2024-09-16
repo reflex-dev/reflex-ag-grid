@@ -48,17 +48,13 @@ data = [
 
 def index():
     return rx.vstack(
-        rx.box(
-            ag_grid(
-                id="grid_1",
-                row_data=data,
-                column_defs=columns,
-                theme="balham",
-            ),
-            width="30vw",
-            height="30vh",
+        ag_grid(
+            id="grid_1",
+            row_data=data,
+            column_defs=columns,
+            theme="balham",
+            height="25vh",
         ),
-        height="100vh",
         align="center",
     ), rx.color_mode.button(position="top-right")
 
