@@ -28,26 +28,36 @@ from reflex_ag_grid.data_source import DataSource
 from reflex_ag_grid import handlers
 ```
 
+## Simple Example
+
+```python
+import reflex as rx
+from reflex_ag_grid import ag_grid
+import pandas as pd
+
+
+df = pd.read_csv(
+    "https://raw.githubusercontent.com/plotly/datasets/master/wind_dataset.csv"
+)
+
+column_defs = [
+    ag_grid.column_def(field="direction"),
+    ag_grid.column_def(field="strength"),
+    ag_grid.column_def(field="frequency"),
+]
+
+
+def ag_grid_simple():
+    return ag_grid(
+        id="ag_grid_basic_1",
+        row_data=df.to_dict("records"),
+        column_defs=column_defs,
+    )
+```
+
+Check out more documentation at [Reflex](https://reflex.dev/docs/library/ag-grid/ag-grid/).
 
 ## FAQ
-
-- **The grid doesn't appear but I don't have any compilation error. What's wrong?**
-
-    You need to wrap your grid inside a `rx.box` or a `rx.el.div` with appropriate style for dimensions (height, width).
-    
-    The grid will occupy the whole space of that wrapping element.
-
-    ```python
-    rx.box(
-        ag_grid(
-            id="grid_1",
-            row_data=data,
-            column_defs=columns,
-        ),
-        width="50vw",
-        height="50vh",
-    )
-    ```
 
 - **The AGGrid feature I want is not available. What can I do?**
 
