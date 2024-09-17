@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import reflex as rx
 
 import os
-from typing import Any
+from typing import Any, Union
 from .datasource import Datasource, SSRMDatasource
 from reflex.components.props import PropsBase
 from typing import Literal
@@ -75,52 +75,133 @@ class ColumnGroup(PropsBase):
 
 
 class AgGrid(rx.Component):
+    """Reflex AgGrid component is a high-performance and highly customizable component that wraps AG Grid, designed for creating rich datagrids."""
+
+    # The library name for the ag-grid-react component
     library: str = "ag-grid-react"
+
+    # The tag name for the AgGridReact component
     tag: str = "AgGridReact"
 
-    get_row_id: rx.EventHandler[lambda e0: [e0]]
+    # Variable for column definitions
     column_defs: rx.Var[list[dict[str, Any] | ColumnDef | ColumnGroup]]
+
+    # Variable for row data
     row_data: rx.Var[list[dict[str, Any]]]
-    tree_data: rx.Var[bool] = rx.Var.create_safe(False)
-    default_col_def: rx.Var[dict[str, Any]] = {}
-    auto_group_column_def: rx.Var[Any] = {}
-    pinned_bottom_row_data: rx.Var[list[dict[str, Any]]] = []
-    group_default_expanded: rx.Var[int] | None = -1
-    group_selects_children: rx.Var[bool] = False
-    suppress_row_click_selection: rx.Var[bool] = False
+
+    # Variable for row selection type
     row_selection: rx.Var[str] = "single"
+
+    # Variable to animate rows
     animate_rows: rx.Var[bool] = False
+
+    # Variable for pagination
     pagination: rx.Var[bool] = False
+
+    # Page size for pagination
     pagination_page_size: rx.Var[int] = 10
+
+    # Selector for pagination page size options
     pagination_page_size_selector: rx.Var[list[int]] = [10, 25, 50]
+
+    # Variable for the side bar configuration
+    side_bar: rx.Var[Union[str, dict[str, Any], bool, list[str]]] = ""
+
+    # Variable to indicate if tree data is used
+    tree_data: rx.Var[bool] = rx.Var.create_safe(False)
+
+    # Default column definition
+    default_col_def: rx.Var[dict[str, Any]] = {}
+
+    # Definition for the auto group column
+    auto_group_column_def: rx.Var[Any] = {}
+
+    # Data for pinned bottom rows
+    pinned_bottom_row_data: rx.Var[list[dict[str, Any]]] = []
+
+    # Default expanded group level
+    group_default_expanded: rx.Var[int] | None = -1
+
+    # Variable to indicate if group selects children
+    group_selects_children: rx.Var[bool] = False
+
+    # Variable to suppress row click selection
+    suppress_row_click_selection: rx.Var[bool] = False
+
+    # Event handler for getting the data path
     get_data_path: rx.EventHandler[lambda e0: [e0]]
-    side_bar: rx.Var[str | dict[str, Any] | bool | list[str]] = ""
+
+    # Variable to allow unbalanced groups
     group_allow_unbalanced: rx.Var[bool] = False
+
+    # Variable to show pivot panel
     pivot_panel_show: rx.Var[str] = "never"
+
+    # Variable to show row group panel
     row_group_panel_show: rx.Var[str] = "never"
+
+    # Variable to suppress aggregate function in header
     suppress_agg_func_in_header: rx.Var[bool] = False
+
+    # Variable to lock group columns
     group_lock_group_columns: rx.Var[int] = 0
+
+    # Variable to maintain column order
     maintain_column_order: rx.Var[bool] = False
 
-    # infinite/serverside row model
+    # Row model type for infinite/serverside row model
     row_model_type: rx.Var[str]
+
+    # Cache block size for infinite/serverside row model
     cache_block_size: rx.Var[int]
+
+    # Maximum blocks in cache for infinite/serverside row model
     max_blocks_in_cache: rx.Var[int]
+
+    # Row buffer size for infinite/serverside row model
     row_buffer: rx.Var[int]
+
+    # Cache overflow size for infinite/serverside row model
     cache_overflow_size: rx.Var[int]
+
+    # Maximum concurrent datasource requests for infinite/serverside row model
     max_concurrent_datasource_requests: rx.Var[int]
+
+    # Initial row count for infinite row model
     infinite_initial_row_count: rx.Var[int]
+
+    # Datasource for infinite/serverside row model
     datasource: rx.Var[Datasource]
+
+
+    # Event handler for getting the row ID
+    get_row_id: rx.EventHandler[lambda e0: [e0]]
+
+    # Event handler to check if it is a server-side group
     is_server_side_group: rx.EventHandler[lambda e0: [e0]]
+
+    # Event handler to get the server-side group key
     get_server_side_group_key: rx.EventHandler[lambda e0: [e0]]
+
+    # Server-side datasource for infinite/serverside row model
     server_side_datasource: rx.Var[SSRMDatasource]
+
+    # Event handler to check if server-side group is open by default
     is_server_side_group_open_by_default: rx.EventHandler[lambda e0: [e0]]
+
+    # Variable to enable client-side sort on server-side
     server_side_enable_client_side_sort: rx.Var[bool] = False
+
+    # Event handler to get the child count
     get_child_count: rx.EventHandler[lambda e0: [e0]]
 
-    # selection events
+    # Event handler for cell click events
     on_cell_clicked: rx.EventHandler[_on_ag_grid_event]
+
+    # Event handler for selection change events
     on_selection_changed: rx.EventHandler[_on_selection_change_signature]
+
+    # Event handler for first data rendered events
     on_first_data_rendered: rx.EventHandler[_on_ag_grid_event]
 
     lib_dependencies: list[str] = [
@@ -128,6 +209,7 @@ class AgGrid(rx.Component):
         "ag-grid-enterprise",
     ]
 
+    # Change the aesthetic theme of the grid
     theme: rx.Var[Literal["quartz", "balham", "alpine", "material"]]
 
     @classmethod
@@ -296,6 +378,7 @@ api.forEachNode(function (node) {{
 
 
 class WrappedAgGrid(AgGrid):
+    """Reflex AgGrid component is a high-performance and highly customizable component that wraps AG Grid, designed for creating rich datagrids."""
     @classmethod
     def create(cls, *children, **props):
         width = props.pop("width", None)
