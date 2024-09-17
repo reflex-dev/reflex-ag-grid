@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reflex-ag-grid"
-version = "0.0.3"
+version = "0.0.4"
 description = "AGGrid wrapping for Reflex"
 readme = "README.md"
 license = { text = "Apache-2.0" }
@@ -17,7 +17,7 @@ dependencies = ["reflex>=0.4.2"]
 classifiers = ["Development Status :: 4 - Beta"]
 
 [project.urls]
-homepage = "https://aggrid-demo.reflex.run/"
+homepage = "https://ag-grid-demo.reflex.run/"
 source = "https://github.com/reflex-dev/reflex-ag-grid"
 
 [project.optional-dependencies]
