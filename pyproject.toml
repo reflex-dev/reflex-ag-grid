@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reflex-ag-grid"
-version = "0.0.2"
+version = "0.0.3"
 description = "AGGrid wrapping for Reflex"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.8"
 authors = [{ name = "Reflex Team", email = "team@reflex.dev" }]
-keywords = ["reflex", "reflex-custom-components", "aggrid", "dashboard"]
+keywords = ["reflex-ag-grid", "ag-grid", "reflex", "reflex-custom-components", "aggrid", "dashboard"]
 
 dependencies = ["reflex>=0.4.2"]
 

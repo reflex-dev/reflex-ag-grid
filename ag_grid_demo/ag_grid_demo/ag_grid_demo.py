@@ -1,66 +1,29 @@
 """Welcome to Reflex! This file showcases the custom component in a basic app."""
 
-from rxconfig import config
-
 import reflex as rx
-
-from reflex_ag_grid import ag_grid, ColumnDef, AGFilters
-
-filename = f"{config.app_name}/{config.app_name}.py"
+from reflex_ag_grid import ag_grid
+import pandas as pd
 
 
-class State(rx.State):
-    """The app state."""
+df = pd.read_csv(
+    "https://raw.githubusercontent.com/plotly/datasets/master/wind_dataset.csv"
+)
 
-    pass
-
-
-columns = [
-    ag_grid.column_def(
-        header_name="Make",
-        field="make",
-        filter=ag_grid.filters.text,
-        editable=True,
-    ),
-    ag_grid.column_def(
-        header_name="Model",
-        field="model",
-        filter=ag_grid.filters.text,
-    ),
-    ag_grid.column_def(
-        **{
-            "header_name": "Price",
-            "field": "price",
-            "filter": ag_grid.filters.number,
-        }  # type: ignore
-    ),
-]
-
-data = [
-    {"make": "Toyota", "model": "Celica", "price": 35000},
-    {"make": "Ford", "model": "Mondeo", "price": 32000},
-    {"make": "Porsche", "model": "Boxster", "price": 72000},
-    {"make": "Toyota", "model": "Celica", "price": 35000},
-    {"make": "Ford", "model": "Mondeo", "price": 32000},
-    {"make": "Porsche", "model": "Boxster", "price": 72000},
+column_defs = [
+    ag_grid.column_def(field="direction"),
+    ag_grid.column_def(field="strength"),
+    ag_grid.column_def(field="frequency"),
 ]
 
 
 def index():
-    return rx.vstack(
-        ag_grid(
-            id="grid_1",
-            row_data=data,
-            column_defs=columns,
-            theme="balham",
-            height="25vh",
-        ),
-        align="center",
-    ), rx.color_mode.button(position="top-right")
+    return ag_grid(
+        id="ag_grid_basic_1",
+        row_data=df.to_dict("records"),
+        column_defs=column_defs,
+    )
 
 
 # Add state and page to the app.
 app = rx.App()
-app.api.redoc_url = None
-app.api.docs_url = None
 app.add_page(index)
