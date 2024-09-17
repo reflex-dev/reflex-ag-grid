@@ -78,7 +78,7 @@ class AgGrid(rx.Component):
     """Reflex AgGrid component is a high-performance and highly customizable component that wraps AG Grid, designed for creating rich datagrids."""
 
     # The library name for the ag-grid-react component
-    library: str = "ag-grid-react"
+    library: str = "ag-grid-react@32.1.0"
 
     # The tag name for the AgGridReact component
     tag: str = "AgGridReact"
@@ -172,7 +172,6 @@ class AgGrid(rx.Component):
 
     # Datasource for infinite/serverside row model
     datasource: rx.Var[Datasource]
-
 
     # Event handler for getting the row ID
     get_row_id: rx.EventHandler[lambda e0: [e0]]
@@ -379,6 +378,7 @@ api.forEachNode(function (node) {{
 
 class WrappedAgGrid(AgGrid):
     """Reflex AgGrid component is a high-performance and highly customizable component that wraps AG Grid, designed for creating rich datagrids."""
+
     @classmethod
     def create(cls, *children, **props):
         width = props.pop("width", None)
