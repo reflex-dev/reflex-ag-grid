@@ -16,18 +16,17 @@ from reflex.components.el import Div
 def _on_ag_grid_event(event: rx.Var) -> list[rx.Var]:
     # Remove non-serializable keys from the event object
     return [
-        rx.Var.create_safe(
+        rx.Var(
             f"(() => {{let {{context, api, columnApi, column, node, event, eventPath, ...rest}} = {event}; return rest}})()",
-            _var_is_string=False,
         )
     ]
 
 
 def _on_selection_change_signature(event: rx.Var) -> list[rx.Var]:
     return [
-        rx.Var.create_safe(f"{event}.api.getSelectedRows()", _var_is_string=False),
-        rx.Var.create_safe(f"{event}.source", _var_is_string=False),
-        rx.Var.create_safe(f"{event}.type", _var_is_string=False),
+        rx.Var(f"{event}.api.getSelectedRows()"),
+        rx.Var(f"{event}.source"),
+        rx.Var(f"{event}.type"),
     ]
 
 
@@ -108,7 +107,7 @@ class AgGrid(rx.Component):
     side_bar: rx.Var[Union[str, dict[str, Any], bool, list[str]]] = ""
 
     # Variable to indicate if tree data is used
-    tree_data: rx.Var[bool] = rx.Var.create_safe(False)
+    tree_data: rx.Var[bool] = rx.Var.create(False)
 
     # Default column definition
     default_col_def: rx.Var[dict[str, Any]] = {}
@@ -228,36 +227,34 @@ class AgGrid(rx.Component):
 
         # handle hierarchical data
         if data_path_key is not None:
-            props["get_data_path"] = rx.Var.create_safe(
-                f"(data) => data.{data_path_key}", _var_is_string=False
-            ).to(rx.EventChain)
+            props["get_data_path"] = rx.Var(f"(data) => data.{data_path_key}").to(
+                rx.EventChain
+            )
 
         if is_server_side_group_key is not None:
-            props["is_server_side_group"] = rx.Var.create_safe(
-                f"(data) => data.{is_server_side_group_key}", _var_is_string=False
+            props["is_server_side_group"] = rx.Var(
+                f"(data) => data.{is_server_side_group_key}"
             ).to(rx.EventChain)
 
         if get_server_side_group_key is not None:
-            props["get_server_side_group_key"] = rx.Var.create_safe(
-                f"(data) => data.{get_server_side_group_key}", _var_is_string=False
+            props["get_server_side_group_key"] = rx.Var(
+                f"(data) => data.{get_server_side_group_key}",
             ).to(rx.EventChain)
 
         if server_side_group_open_level is not None:
-            props["server_side_group_open_level"] = rx.Var.create_safe(
-                f"(params) => params.rowNode.level < {server_side_group_open_level}",
-                _var_is_string=False,
+            props["server_side_group_open_level"] = rx.Var(
+                f"(params) => params.rowNode.level < {server_side_group_open_level}"
             ).to(rx.EventChain)
 
         if child_count_key is not None:
-            props["get_child_count"] = rx.Var.create_safe(
-                f"(data) => data ? data.{child_count_key} : undefined",
-                _var_is_string=False,
+            props["get_child_count"] = rx.Var(
+                f"(data) => data ? data.{child_count_key} : undefined"
             ).to(rx.EventChain)
 
         if row_id_key is not None:
-            props["get_row_id"] = rx.Var.create_safe(
-                f"(params) => params.data.{row_id_key}", _var_is_string=False
-            ).to(rx.EventChain)
+            props["get_row_id"] = rx.Var(f"(params) => params.data.{row_id_key}").to(
+                rx.EventChain
+            )
 
         props["class_name"] = rx.match(
             props.get("theme", "quartz"),
@@ -346,13 +343,13 @@ api.forEachNode(function (node) {{
     def set_datasource(self, datasource: Datasource):
         return self.setGridOption(
             key="datasource",
-            value=rx.Var.create_safe(datasource, _var_is_string=False),
+            value=rx.Var.create(datasource, _var_is_string=False),
         )
 
     def set_serverside_datasource(self, datasource: SSRMDatasource):
         return self.setGridOption(
             key="serverSideDatasource",
-            value=rx.Var.create_safe(datasource, _var_is_string=False),
+            value=rx.Var.create(datasource, _var_is_string=False),
         )
 
     def show_loading_overlay(self) -> rx.event.EventSpec:
