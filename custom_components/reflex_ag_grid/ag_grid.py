@@ -22,6 +22,20 @@ def _on_ag_grid_event(event: rx.Var) -> list[rx.Var]:
     ]
 
 
+def _on_cell_value_changed(event: rx.Var) -> list[rx.Var]:
+    return [
+        rx.Var(
+            f"(() => {{let {{rowIndex, ...rest}} = {event}; console.log({event}) ; return rowIndex}})()"
+        ),  # index of the row being changed
+        rx.Var(
+            f"(() => {{let {{colDef, ...rest}} = {event}; return colDef.field}})()"
+        ),  # field of the column being changed
+        rx.Var(
+            f"(() => {{let {{newValue, ...rest}} = {event}; return newValue}})()"
+        ),  # new value
+    ]
+
+
 def _on_selection_change_signature(event: rx.Var) -> list[rx.Var]:
     return [
         rx.Var(f"{event}.api.getSelectedRows()"),
@@ -201,6 +215,8 @@ class AgGrid(rx.Component):
 
     # Event handler for first data rendered events
     on_first_data_rendered: rx.EventHandler[_on_ag_grid_event]
+
+    on_cell_value_changed: rx.EventHandler[_on_cell_value_changed]
 
     lib_dependencies: list[str] = [
         "ag-grid-community",
