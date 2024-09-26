@@ -44,6 +44,11 @@ def _on_selection_change_signature(event: rx.Var) -> list[rx.Var]:
     ]
 
 
+size_columns_to_fit = rx.Var(
+    "(event) => event.api.sizeColumnsToFit()", _var_type=rx.EventChain
+)
+
+
 class AGFilters(SimpleNamespace):
     text = "agTextColumnFilter"
     number = "agNumberColumnFilter"
@@ -113,6 +118,9 @@ class AgGrid(rx.Component):
 
     # Page size for pagination
     pagination_page_size: rx.Var[int] = 10
+
+    # Strategy for auto sizing
+    auto_size_stragegy: rx.Var[dict] = {}
 
     # Selector for pagination page size options
     pagination_page_size_selector: rx.Var[list[int]] = [10, 25, 50]
@@ -226,6 +234,9 @@ class AgGrid(rx.Component):
     # Change the aesthetic theme of the grid
     theme: rx.Var[Literal["quartz", "balham", "alpine", "material"]]
 
+    # Event handler for when the grid is ready
+    on_grid_ready: rx.EventHandler[lambda e0: [e0]]
+
     @classmethod
     def create(
         cls,
@@ -283,6 +294,9 @@ class AgGrid(rx.Component):
             ),
             "",
         )
+
+        if "auto_size_strategy" in props:
+            props["on_grid_ready"] = size_columns_to_fit
 
         return super().create(*children, **props)
 
@@ -408,6 +422,7 @@ class AgGridNamespace(rx.ComponentNamespace):
     column_group = ColumnGroup
     filters = AGFilters
     editors = AGEditors
+    size_columns_to_fit = size_columns_to_fit
     root = AgGrid.create
     __call__ = WrappedAgGrid.create
 
