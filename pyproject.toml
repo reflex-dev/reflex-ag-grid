@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reflex-ag-grid"
-version = "0.0.7"
+version = "0.0.8a1"
 description = "AGGrid wrapping for Reflex"
 readme = "README.md"
 license = { text = "Apache-2.0" }

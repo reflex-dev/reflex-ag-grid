@@ -224,6 +224,7 @@ class AgGrid(rx.Component):
     # Event handler for first data rendered events
     on_first_data_rendered: rx.EventHandler[_on_ag_grid_event]
 
+    # Event handler for row data changed events
     on_cell_value_changed: rx.EventHandler[_on_cell_value_changed]
 
     lib_dependencies: list[str] = [
