@@ -1,6 +1,7 @@
 import reflex as rx
 
 from reflex.base import Base
+from reflex.components.props import PropsBase
 from reflex.config import get_config
 from reflex.utils import format
 from reflex.utils.imports import ImportVar
@@ -54,6 +55,13 @@ class Datasource(Base):
                 }
             ),
         )
+
+    def dict(self, **kwargs):
+        d = super().dict(**kwargs)
+        d.pop("uri", None)
+        if self.getRows is None:
+            d["getRows"] = self._get_rows_function()
+        return d
 
     def json(self) -> str:
         """Convert the object to a json-like string.
