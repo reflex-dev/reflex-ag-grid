@@ -368,13 +368,13 @@ api.forEachNode(function (node) {{
 
     def setGridOption(self, key: str, value: rx.Var) -> rx.event.EventSpec:
         return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.setGridOption('{key}', {value})",
+            f"refs['{self.get_ref()}']?.current?.api.setGridOption('{key}', {str(value)})",
         )
 
     def set_datasource(self, datasource: Datasource):
         return self.setGridOption(
             key="datasource",
-            value=rx.Var.create(datasource, _var_is_string=False),
+            value=rx.Var.create(datasource),
         )
 
     def set_serverside_datasource(self, datasource: SSRMDatasource):
