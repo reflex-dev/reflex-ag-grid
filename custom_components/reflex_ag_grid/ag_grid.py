@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import reflex as rx
 
 import os
-from typing import Any, Union
+from typing import Any, Callable, Union
 from .datasource import Datasource, SSRMDatasource
 from reflex.components.props import PropsBase
 from typing import Literal
@@ -81,6 +81,7 @@ class ColumnDef(PropsBase):
     checkbox_selection: bool | None = False
     cell_editor: AGEditors | str | None = None
     cell_editor_params: dict[str, list[Any]] | None = None
+    value_setter: rx.EventChain | None = None
 
 
 class ColumnGroup(PropsBase):
@@ -90,6 +91,23 @@ class ColumnGroup(PropsBase):
     open_by_default: bool = False
     column_group_show: Literal["open", "closed"] = "open"
     header_name: str
+
+
+class AgGridAPI(rx.Base):
+    ref: str
+
+    @property
+    def _api(self) -> rx.Var:
+        return f"refs['{self.ref}']?.current?.api"
+
+    def __getattr__(self, name: str) -> Callable[[Any], rx.event.EventSpec]:
+        def _call_api(*args):
+            var_args = [str(rx.Var.create(arg)) for arg in args]
+            return rx.call_script(
+                f"{self._api}.{rx.utils.format.to_camel_case(name)}({', '.join(var_args)})"
+            )
+
+        return _call_api
 
 
 class AgGrid(rx.Component):
@@ -323,6 +341,10 @@ class AgGrid(rx.Component):
             return [f"LicenseManager.setLicenseKey('{ag_grid_license_key}');"]
         return ["LicenseManager.setLicenseKey(null);"]
 
+    @property
+    def api(self) -> AgGridAPI:
+        return AgGridAPI(ref=self.get_ref())
+
     def getSelectedRows(self, callback: rx.EventHandler) -> rx.event.EventSpec:
         return rx.call_script(
             f"refs['{self.get_ref()}']?.current?.api.getSelectedRows()",
@@ -367,9 +389,7 @@ api.forEachNode(function (node) {{
         )
 
     def setGridOption(self, key: str, value: rx.Var) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.setGridOption('{key}', {str(value)})",
-        )
+        return self.api.set_grid_option(key, value)
 
     def set_datasource(self, datasource: Datasource):
         return self.setGridOption(
