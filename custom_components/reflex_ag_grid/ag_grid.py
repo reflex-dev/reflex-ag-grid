@@ -68,29 +68,29 @@ class AGEditors(SimpleNamespace):
 
 
 class ColumnDef(PropsBase):
-    field: str
-    col_id: str | None = None
-    type: str | None = None
-    cell_data_type: bool | str | None = None
-    hide: bool = False
-    editable: bool | None = False
-    filter: AGFilters | str | None = None
-    floating_filter: bool = False
-    header_name: str | None = None
-    header_tooltip: str | None = None
-    checkbox_selection: bool | None = False
-    cell_editor: AGEditors | str | None = None
-    cell_editor_params: dict[str, list[Any]] | None = None
-    value_setter: rx.EventChain | None = None
+    field: str | rx.Var[str]
+    col_id: str | rx.Var[str] | None = None
+    type: str | rx.Var[str] | None = None
+    cell_data_type: bool | str | rx.Var[bool] | rx.Var[str] | None = None
+    hide: bool | rx.Var[bool] = False
+    editable: bool | rx.Var[bool] = False
+    filter: AGFilters | str | rx.Var[AGFilters] | rx.Var[str] | None = None
+    floating_filter: bool | rx.Var[bool] = False
+    header_name: str | rx.Var[str] | None = None
+    header_tooltip: str | rx.Var[str] | None = None
+    checkbox_selection: bool | rx.Var[bool] = False
+    cell_editor: AGEditors | str | rx.Var[AGEditors] | rx.Var[str] | None = None
+    cell_editor_params: dict[str, list[Any]] | rx.Var[dict[str, list[Any]]] | None = None
+    value_setter: rx.EventChain | rx.Var[rx.EventChain] | None = None
 
 
 class ColumnGroup(PropsBase):
-    children: list["ColumnDef | ColumnGroup"]
-    group_id: str
-    marry_children: bool = False
-    open_by_default: bool = False
-    column_group_show: Literal["open", "closed"] = "open"
-    header_name: str
+    children: list["ColumnDef | ColumnGroup"] | rx.Var[list["ColumnDef | ColumnGroup"]]
+    group_id: str | rx.Var[str]
+    marry_children: bool | rx.Var[bool] = False
+    open_by_default: bool | rx.Var[bool] = False
+    column_group_show: Literal["open", "closed"] | rx.Var[str] = "open"
+    header_name: str | rx.Var[str]
 
 
 class AgGridAPI(rx.Base):
