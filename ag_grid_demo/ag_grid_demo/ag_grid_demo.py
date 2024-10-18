@@ -16,11 +16,55 @@ column_defs = [
 ]
 
 
+class BasicGridState(rx.State):
+    selection: list[dict[str, str]] = []
+
+
+def selected_item(item: dict[str, str]) -> rx.Component:
+    return rx.card(
+        rx.data_list.root(
+            rx.foreach(
+                item,
+                lambda kv: rx.data_list.item(
+                    rx.data_list.label(kv[0]),
+                    rx.data_list.value(kv[1]),
+                ),
+            ),
+        ),
+    )
+
+
 def index():
-    return ag_grid(
-        id="ag_grid_basic_1",
-        row_data=df.to_dict("records"),
-        column_defs=column_defs,
+    return rx.hstack(
+        rx.vstack(
+            ag_grid(
+                id="ag_grid_basic_1",
+                row_data=df.to_dict("records"),
+                column_defs=column_defs,
+                row_selection="multiple",
+                on_selection_changed=lambda rows, _0, _1: BasicGridState.set_selection(
+                    rows
+                ),
+                width="50vw",
+            ),
+            rx.heading("Other demos"),
+            rx.link("Simple ModelWrapper", href="/model"),
+            rx.text(
+                rx.link("Customized ModelWrapper", href="/model-auth"),
+                " (Generate data)",
+            ),
+        ),
+        rx.vstack(
+            rx.heading("Selected Items"),
+            rx.hstack(
+                rx.foreach(
+                    BasicGridState.selection,
+                    selected_item,
+                ),
+                wrap="wrap",
+            ),
+            max_width="48vw",
+        ),
     )
 
 
