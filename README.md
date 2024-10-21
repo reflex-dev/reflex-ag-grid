@@ -55,7 +55,7 @@ def ag_grid_simple():
     )
 ```
 
-Check out more documentation at [Reflex](https://reflex.dev/docs/library/ag-grid/ag-grid/).
+Check out more documentation at [Reflex](https://reflex.dev/docs/library/tables-and-data-grids/ag-grid/).
 
 ## FAQ
 
