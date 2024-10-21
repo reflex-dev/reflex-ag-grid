@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 authors = [{ name = "Reflex Team", email = "team@reflex.dev" }]
 keywords = ["reflex-ag-grid", "ag-grid", "reflex", "reflex-custom-components", "aggrid", "dashboard"]
 
-dependencies = ["reflex>=0.6.0"]
+dependencies = ["reflex>=0.6.3"]
 
 classifiers = ["Development Status :: 4 - Beta"]
 
