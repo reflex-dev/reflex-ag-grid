@@ -80,9 +80,9 @@ class ColumnDef(PropsBase):
     header_tooltip: str | rx.Var[str] | None = None
     checkbox_selection: bool | rx.Var[bool] = False
     cell_editor: AGEditors | str | rx.Var[AGEditors] | rx.Var[str] | None = None
-    cell_editor_params: dict[str, list[Any]] | rx.Var[
-        dict[str, list[Any]]
-    ] | None = None
+    cell_editor_params: dict[str, list[Any]] | rx.Var[dict[str, list[Any]]] | None = (
+        None
+    )
     value_setter: rx.EventChain | rx.Var[rx.EventChain] | None = None
     value_formatter: rx.Var = None
 
@@ -241,6 +241,9 @@ class AgGrid(rx.Component):
 
     # Event handler for cell click events
     on_cell_clicked: rx.EventHandler[_on_ag_grid_event]
+
+    # Event handler for cell double click events
+    on_cell_double_clicked: rx.EventHandler[_on_ag_grid_event]
 
     # Event handler for selection change events
     on_selection_changed: rx.EventHandler[_on_selection_change_signature]
