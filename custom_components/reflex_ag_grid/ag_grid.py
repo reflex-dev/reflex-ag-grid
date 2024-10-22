@@ -80,8 +80,11 @@ class ColumnDef(PropsBase):
     header_tooltip: str | rx.Var[str] | None = None
     checkbox_selection: bool | rx.Var[bool] = False
     cell_editor: AGEditors | str | rx.Var[AGEditors] | rx.Var[str] | None = None
-    cell_editor_params: dict[str, list[Any]] | rx.Var[dict[str, list[Any]]] | None = None
+    cell_editor_params: dict[str, list[Any]] | rx.Var[
+        dict[str, list[Any]]
+    ] | None = None
     value_setter: rx.EventChain | rx.Var[rx.EventChain] | None = None
+    value_formatter: rx.Var = None
 
 
 class ColumnGroup(PropsBase):
@@ -138,7 +141,7 @@ class AgGrid(rx.Component):
     pagination_page_size: rx.Var[int] = 10
 
     # Strategy for auto sizing
-    auto_size_stragegy: rx.Var[dict] = {}
+    auto_size_strategy: rx.Var[dict] = {}
 
     # Selector for pagination page size options
     pagination_page_size_selector: rx.Var[list[int]] = [10, 25, 50]
@@ -154,6 +157,9 @@ class AgGrid(rx.Component):
 
     # Definition for the auto group column
     auto_group_column_def: rx.Var[Any] = {}
+
+    # Data for pinned top rows
+    pinned_top_row_data: rx.Var[list[dict[str, Any]]] = []
 
     # Data for pinned bottom rows
     pinned_bottom_row_data: rx.Var[list[dict[str, Any]]] = []
@@ -246,8 +252,8 @@ class AgGrid(rx.Component):
     on_cell_value_changed: rx.EventHandler[_on_cell_value_changed]
 
     lib_dependencies: list[str] = [
-        "ag-grid-community",
-        "ag-grid-enterprise",
+        "ag-grid-community@32.1.0",
+        "ag-grid-enterprise@32.1.0",
     ]
 
     # Change the aesthetic theme of the grid
