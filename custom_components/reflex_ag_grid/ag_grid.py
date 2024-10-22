@@ -80,9 +80,9 @@ class ColumnDef(PropsBase):
     header_tooltip: str | rx.Var[str] | None = None
     checkbox_selection: bool | rx.Var[bool] = False
     cell_editor: AGEditors | str | rx.Var[AGEditors] | rx.Var[str] | None = None
-    cell_editor_params: dict[str, list[Any]] | rx.Var[
-        dict[str, list[Any]]
-    ] | None = None
+    cell_editor_params: dict[str, list[Any]] | rx.Var[dict[str, list[Any]]] | None = (
+        None
+    )
     value_setter: rx.EventChain | rx.Var[rx.EventChain] | None = None
     value_formatter: rx.Var = None
 
@@ -370,7 +370,7 @@ class AgGrid(rx.Component):
     def select_rows_by_key(self, keys: list[str]) -> rx.event.EventHandler:
         keys_var = rx.Var.create(keys, _var_is_string=False)
         script = f"""
-let api = refs['{self.get_ref()}']?.current?.api
+let api = {self.api}'];
 const selected_nodes = [];
 let keys_set = new Set({keys_var});
 api.forEachNode(function (node) {{
@@ -386,7 +386,7 @@ api.setNodesSelected({{ nodes: selected_nodes, newValue: true }});
     def log_nodes(self) -> rx.event.EventSpec:
         return rx.call_script(
             f"""
-let api = refs['{self.get_ref()}']?.current?.api;
+let api = {self.api}'];
 console.log("Logging nodes");
 api.forEachNode(function (node) {{
     console.log(node.key);
@@ -410,24 +410,20 @@ api.forEachNode(function (node) {{
         )
 
     def show_loading_overlay(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.showLoadingOverlay()",
-        )
+        return self.api.showLoadingOverlay()
 
     def show_no_rows_overlay(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.showNoRowsOverlay()",
-        )
+        return self.api.showNoRowsOverlay()
 
     def hide_overlay(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.hideOverlay()",
-        )
+        return self.api.hideOverlay()
 
     def redraw_rows(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.redrawRows()",
-        )
+        return self.api.redrawRows()
+
+    def export_data_as_csv(self) -> rx.event.EventSpec:
+        """Export the grid data as a CSV file."""
+        return self.api.exportDataAsCsv()
 
 
 class WrappedAgGrid(AgGrid):
