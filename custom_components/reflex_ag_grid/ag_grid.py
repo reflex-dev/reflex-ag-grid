@@ -370,7 +370,7 @@ class AgGrid(rx.Component):
     def select_rows_by_key(self, keys: list[str]) -> rx.event.EventHandler:
         keys_var = rx.Var.create(keys, _var_is_string=False)
         script = f"""
-let api = {self.api}'];
+let api = {self.api};
 const selected_nodes = [];
 let keys_set = new Set({keys_var});
 api.forEachNode(function (node) {{
