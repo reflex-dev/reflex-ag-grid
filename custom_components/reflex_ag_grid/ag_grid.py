@@ -353,18 +353,18 @@ class AgGrid(rx.Component):
 
     def getSelectedRows(self, callback: rx.EventHandler) -> rx.event.EventSpec:
         return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.getSelectedRows()",
+            f"refs['{self.api}.getSelectedRows()",
             callback=callback,
         )
 
     def selectAll(self) -> rx.event.EventSpec:
         return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.selectAll()",
+            f"refs['{self.api}.selectAll()",
         )
 
     def deselectAll(self) -> rx.event.EventSpec:
         return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.deselectAll()",
+            f"refs['{self.api}.deselectAll()",
         )
 
     def select_rows_by_key(self, keys: list[str]) -> rx.event.EventHandler:
@@ -386,7 +386,7 @@ api.setNodesSelected({{ nodes: selected_nodes, newValue: true }});
     def log_nodes(self) -> rx.event.EventSpec:
         return rx.call_script(
             f"""
-let api = {self.api}'];
+let api = {self.api};
 console.log("Logging nodes");
 api.forEachNode(function (node) {{
     console.log(node.key);
