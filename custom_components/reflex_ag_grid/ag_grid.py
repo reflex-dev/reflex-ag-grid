@@ -104,7 +104,16 @@ class AgGridAPI(rx.Base):
         return f"refs['{self.ref}']?.current?.api"
 
     def __getattr__(self, name: str) -> Callable[[Any], rx.event.EventSpec]:
-        def _call_api(*args, **kwargs):
+        def _call_api(*args, **kwargs) -> rx.event.EventSpec:
+            """Call the ag-grid API method with the given arguments.
+            
+            Args:
+                *args: Arguments to pass to the API method.
+                **kwargs: Keyword arguments to pass to rx.call_script.
+            
+            Returns:
+                rx.event.EventSpec: The event specification.
+            """
             var_args = [str(rx.Var.create(arg)) for arg in args]
             return rx.call_script(
                 f"{self._api}.{rx.utils.format.to_camel_case(name)}({', '.join(var_args)})",
