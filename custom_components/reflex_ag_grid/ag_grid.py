@@ -104,10 +104,11 @@ class AgGridAPI(rx.Base):
         return f"refs['{self.ref}']?.current?.api"
 
     def __getattr__(self, name: str) -> Callable[[Any], rx.event.EventSpec]:
-        def _call_api(*args):
+        def _call_api(*args, **kwargs):
             var_args = [str(rx.Var.create(arg)) for arg in args]
             return rx.call_script(
-                f"{self._api}.{rx.utils.format.to_camel_case(name)}({', '.join(var_args)})"
+                f"{self._api}.{rx.utils.format.to_camel_case(name)}({', '.join(var_args)})",
+                **kwargs
             )
 
         return _call_api
@@ -351,21 +352,14 @@ class AgGrid(rx.Component):
     def api(self) -> AgGridAPI:
         return AgGridAPI(ref=self.get_ref())
 
-    def getSelectedRows(self, callback: rx.EventHandler) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.api}.getSelectedRows()",
-            callback=callback,
-        )
+    def get_selected_rows(self, callback: rx.EventHandler) -> rx.event.EventSpec:
+        return self.api.getSelectedRows(callback=callback)
 
-    def selectAll(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.api}.selectAll()",
-        )
+    def select_all(self) -> rx.event.EventSpec:
+        return self.api.selectAll()
 
-    def deselectAll(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.api}.deselectAll()",
-        )
+    def deselect_all(self) -> rx.event.EventSpec:
+        return self.api.deselectAll()
 
     def select_rows_by_key(self, keys: list[str]) -> rx.event.EventHandler:
         keys_var = rx.Var.create(keys, _var_is_string=False)
