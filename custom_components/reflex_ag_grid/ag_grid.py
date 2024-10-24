@@ -80,9 +80,9 @@ class ColumnDef(PropsBase):
     header_tooltip: str | rx.Var[str] | None = None
     checkbox_selection: bool | rx.Var[bool] = False
     cell_editor: AGEditors | str | rx.Var[AGEditors] | rx.Var[str] | None = None
-    cell_editor_params: dict[str, list[Any]] | rx.Var[
-        dict[str, list[Any]]
-    ] | None = None
+    cell_editor_params: dict[str, list[Any]] | rx.Var[dict[str, list[Any]]] | None = (
+        None
+    )
     value_setter: rx.EventChain | rx.Var[rx.EventChain] | None = None
     value_formatter: rx.Var = None
 
