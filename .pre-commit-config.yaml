@@ -9,5 +9,4 @@ repos:
         args: [custom_components, ag_grid_demo]
       - id: ruff
         args: ["--fix", "--exit-non-zero-on-fix"]
-        exclude: '^integration/benchmarks/'
 
