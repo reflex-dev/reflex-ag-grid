@@ -85,6 +85,12 @@ class ColumnDef(PropsBase):
     ] | None = None
     value_setter: rx.EventChain | rx.Var[rx.EventChain] | None = None
     value_formatter: rx.Var = None
+    wrap_text: bool | None = None
+    auto_height: bool | None = None
+    enable_cell_change_flash: bool | None = None
+    cell_editor_popup: bool | None = None
+    cell_editor_popup_position: str | None = None
+    resizable: bool | None = None
 
 
 class ColumnGroup(PropsBase):
