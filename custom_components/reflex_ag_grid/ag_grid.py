@@ -112,18 +112,18 @@ class AgGridAPI(rx.Base):
     def __getattr__(self, name: str) -> Callable[[Any], rx.event.EventSpec]:
         def _call_api(*args, **kwargs) -> rx.event.EventSpec:
             """Call the ag-grid API method with the given arguments.
-            
+
             Args:
                 *args: Arguments to pass to the API method.
                 **kwargs: Keyword arguments to pass to rx.call_script.
-            
+
             Returns:
                 rx.event.EventSpec: The event specification.
             """
             var_args = [str(rx.Var.create(arg)) for arg in args]
             return rx.call_script(
                 f"{self._api}.{rx.utils.format.to_camel_case(name)}({', '.join(var_args)})",
-                **kwargs
+                **kwargs,
             )
 
         return _call_api
@@ -261,14 +261,17 @@ class AgGrid(rx.Component):
     # Event handler for cell double click events
     on_cell_double_clicked: rx.EventHandler[_on_ag_grid_event]
 
+    # Event handler for right click on a cell
+    on_cell_context_menu: rx.EventHandler[_on_ag_grid_event]
+
+    # Event handler for row data changed events
+    on_cell_value_changed: rx.EventHandler[_on_cell_value_changed]
+
     # Event handler for selection change events
     on_selection_changed: rx.EventHandler[_on_selection_change_signature]
 
     # Event handler for first data rendered events
     on_first_data_rendered: rx.EventHandler[_on_ag_grid_event]
-
-    # Event handler for row data changed events
-    on_cell_value_changed: rx.EventHandler[_on_cell_value_changed]
 
     lib_dependencies: list[str] = [
         "ag-grid-community@32.1.0",
