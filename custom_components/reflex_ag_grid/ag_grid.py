@@ -242,6 +242,9 @@ class AgGrid(rx.Component):
     # Event handler for cell click events
     on_cell_clicked: rx.EventHandler[_on_ag_grid_event]
 
+    # Event handler for cell double click events
+    on_cell_double_clicked: rx.EventHandler[_on_ag_grid_event]
+
     # Event handler for selection change events
     on_selection_changed: rx.EventHandler[_on_selection_change_signature]
 
