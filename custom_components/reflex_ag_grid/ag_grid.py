@@ -104,10 +104,20 @@ class AgGridAPI(rx.Base):
         return f"refs['{self.ref}']?.current?.api"
 
     def __getattr__(self, name: str) -> Callable[[Any], rx.event.EventSpec]:
-        def _call_api(*args):
+        def _call_api(*args, **kwargs) -> rx.event.EventSpec:
+            """Call the ag-grid API method with the given arguments.
+            
+            Args:
+                *args: Arguments to pass to the API method.
+                **kwargs: Keyword arguments to pass to rx.call_script.
+            
+            Returns:
+                rx.event.EventSpec: The event specification.
+            """
             var_args = [str(rx.Var.create(arg)) for arg in args]
             return rx.call_script(
-                f"{self._api}.{rx.utils.format.to_camel_case(name)}({', '.join(var_args)})"
+                f"{self._api}.{rx.utils.format.to_camel_case(name)}({', '.join(var_args)})",
+                **kwargs
             )
 
         return _call_api
@@ -354,26 +364,19 @@ class AgGrid(rx.Component):
     def api(self) -> AgGridAPI:
         return AgGridAPI(ref=self.get_ref())
 
-    def getSelectedRows(self, callback: rx.EventHandler) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.getSelectedRows()",
-            callback=callback,
-        )
+    def get_selected_rows(self, callback: rx.EventHandler) -> rx.event.EventSpec:
+        return self.api.getSelectedRows(callback=callback)
 
-    def selectAll(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.selectAll()",
-        )
+    def select_all(self) -> rx.event.EventSpec:
+        return self.api.selectAll()
 
-    def deselectAll(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.deselectAll()",
-        )
+    def deselect_all(self) -> rx.event.EventSpec:
+        return self.api.deselectAll()
 
     def select_rows_by_key(self, keys: list[str]) -> rx.event.EventHandler:
         keys_var = rx.Var.create(keys, _var_is_string=False)
         script = f"""
-let api = refs['{self.get_ref()}']?.current?.api
+let api = {self.api};
 const selected_nodes = [];
 let keys_set = new Set({keys_var});
 api.forEachNode(function (node) {{
@@ -389,7 +392,7 @@ api.setNodesSelected({{ nodes: selected_nodes, newValue: true }});
     def log_nodes(self) -> rx.event.EventSpec:
         return rx.call_script(
             f"""
-let api = refs['{self.get_ref()}']?.current?.api;
+let api = {self.api};
 console.log("Logging nodes");
 api.forEachNode(function (node) {{
     console.log(node.key);
@@ -413,24 +416,20 @@ api.forEachNode(function (node) {{
         )
 
     def show_loading_overlay(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.showLoadingOverlay()",
-        )
+        return self.api.showLoadingOverlay()
 
     def show_no_rows_overlay(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.showNoRowsOverlay()",
-        )
+        return self.api.showNoRowsOverlay()
 
     def hide_overlay(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.hideOverlay()",
-        )
+        return self.api.hideOverlay()
 
     def redraw_rows(self) -> rx.event.EventSpec:
-        return rx.call_script(
-            f"refs['{self.get_ref()}']?.current?.api.redrawRows()",
-        )
+        return self.api.redrawRows()
+
+    def export_data_as_csv(self) -> rx.event.EventSpec:
+        """Export the grid data as a CSV file."""
+        return self.api.exportDataAsCsv()
 
 
 class WrappedAgGrid(AgGrid):
