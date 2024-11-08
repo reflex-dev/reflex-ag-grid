@@ -184,6 +184,18 @@ class ColumnGroup(PropsBase):
 class AgGridAPI(rx.Base):
     ref: str
 
+    @classmethod
+    def create(cls, id: str) -> "AgGridAPI":
+        """Create an instance of the AgGridAPI class.
+
+        Args:
+            id: The ID of the AgGrid component.
+
+        Returns:
+            An instance of the AgGridAPI class.
+        """
+        return cls(ref=rx.utils.format.format_ref(id))
+
     @property
     def _api(self) -> rx.Var:
         return f"refs['{self.ref}']?.current?.api"
@@ -562,6 +574,7 @@ class WrappedAgGrid(AgGrid):
 
 
 class AgGridNamespace(rx.ComponentNamespace):
+    api = AgGridAPI.create
     column_def = ColumnDef
     column_group = ColumnGroup
     filters = AGFilters
