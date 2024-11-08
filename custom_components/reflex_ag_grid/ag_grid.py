@@ -92,7 +92,10 @@ def _on_column_event_spec(event: rx.Var) -> list[rx.Var]:
 def _on_row_selected(event: rx.Var) -> list[rx.Var]:
     return [
         arrow_callback(
-            f"let {{type, node, data, rowIndex, ...rest}} = {event}; return {{type, data, rowIndex}}"
+            [
+                f"let {{type, node, data, rowIndex, ...rest}} = {event}",
+                "return {type, data, rowIndex}",
+            ]
         )
     ]
 
