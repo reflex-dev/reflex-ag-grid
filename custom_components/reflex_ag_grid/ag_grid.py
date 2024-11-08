@@ -233,61 +233,61 @@ class AgGrid(rx.Component):
     pagination: rx.Var[bool] = False
 
     # Page size for pagination
-    pagination_page_size: rx.Var[int] = 10
+    pagination_page_size: rx.Var[int] = rx.Var.create(10)
 
     # Strategy for auto sizing
-    auto_size_strategy: rx.Var[dict] = {}
+    auto_size_strategy: rx.Var[dict] = rx.Var.create({})
 
     # Selector for pagination page size options
-    pagination_page_size_selector: rx.Var[list[int]] = [10, 25, 50]
+    pagination_page_size_selector: rx.Var[list[int]] = rx.Var.create([10, 25, 50])
 
     # Variable for the side bar configuration
-    side_bar: rx.Var[Union[str, dict[str, Any], bool, list[str]]] = ""
+    side_bar: rx.Var[Union[str, dict[str, Any], bool, list[str]]] = rx.Var.create("")
 
     # Variable to indicate if tree data is used
     tree_data: rx.Var[bool] = rx.Var.create(False)
 
     # Default column definition
-    default_col_def: rx.Var[dict[str, Any]] = {}
+    default_col_def: rx.Var[dict[str, Any]] = rx.Var.create({})
 
     # Definition for the auto group column
-    auto_group_column_def: rx.Var[Any] = {}
+    auto_group_column_def: rx.Var[Any] = rx.Var.create({})
 
     # Data for pinned top rows
-    pinned_top_row_data: rx.Var[list[dict[str, Any]]] = []
+    pinned_top_row_data: rx.Var[list[dict[str, Any]]] = rx.Var.create([])
 
     # Data for pinned bottom rows
-    pinned_bottom_row_data: rx.Var[list[dict[str, Any]]] = []
+    pinned_bottom_row_data: rx.Var[list[dict[str, Any]]] = rx.Var.create([])
 
     # Default expanded group level
-    group_default_expanded: rx.Var[int] | None = -1
+    group_default_expanded: rx.Var[int] | None = rx.Var.create(-1)
 
     # Variable to indicate if group selects children
-    group_selects_children: rx.Var[bool] = False
+    group_selects_children: rx.Var[bool] = rx.Var.create(False)
 
     # Variable to suppress row click selection
-    suppress_row_click_selection: rx.Var[bool] = False
+    suppress_row_click_selection: rx.Var[bool] = rx.Var.create(False)
 
     # Event handler for getting the data path
     get_data_path: rx.EventHandler[lambda e0: [e0]]
 
     # Variable to allow unbalanced groups
-    group_allow_unbalanced: rx.Var[bool] = False
+    group_allow_unbalanced: rx.Var[bool] = rx.Var.create(False)
 
     # Variable to show pivot panel
-    pivot_panel_show: rx.Var[str] = "never"
+    pivot_panel_show: rx.Var[str] = rx.Var.create("never")
 
     # Variable to show row group panel
-    row_group_panel_show: rx.Var[str] = "never"
+    row_group_panel_show: rx.Var[str] = rx.Var.create("never")
 
     # Variable to suppress aggregate function in header
-    suppress_agg_func_in_header: rx.Var[bool] = False
+    suppress_agg_func_in_header: rx.Var[bool] = rx.Var.create(False)
 
     # Variable to lock group columns
-    group_lock_group_columns: rx.Var[int] = 0
+    group_lock_group_columns: rx.Var[int] = rx.Var.create(0)
 
     # Variable to maintain column order
-    maintain_column_order: rx.Var[bool] = False
+    maintain_column_order: rx.Var[bool] = rx.Var.create(False)
 
     # Row model type for infinite/serverside row model
     row_model_type: rx.Var[str]
