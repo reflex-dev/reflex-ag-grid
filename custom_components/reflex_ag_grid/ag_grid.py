@@ -334,7 +334,14 @@ class AgGrid(rx.Component):
     # Event handler for cell click events
     on_cell_clicked: rx.EventHandler[_on_cell_event_spec]
 
+    # Event handler for cell focused events
     on_cell_focused: rx.EventHandler[_on_cell_event_spec]
+
+    # Event handler for cell mouse over events
+    on_cell_mouse_over: rx.EventHandler[_on_cell_event_spec]
+
+    # Event handler for cell mouse out events
+    on_cell_mouse_out: rx.EventHandler[_on_cell_event_spec]
 
     # Event handler for cell double click events
     on_cell_double_clicked: rx.EventHandler[_on_cell_event_spec]
