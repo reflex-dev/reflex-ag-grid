@@ -40,7 +40,7 @@ def exclude_non_serializable_keys(
     return exprs
 
 
-def _on_ag_grid_event(event: rx.Var) -> list[rx.Var]:
+def _on_cell_event_spec(event: rx.Var) -> list[rx.Var]:
     # Remove non-serializable keys from the event object
     exclude_keys = [
         "context",
@@ -332,13 +332,15 @@ class AgGrid(rx.Component):
     get_child_count: rx.EventHandler[lambda e0: [e0]]
 
     # Event handler for cell click events
-    on_cell_clicked: rx.EventHandler[_on_ag_grid_event]
+    on_cell_clicked: rx.EventHandler[_on_cell_event_spec]
+
+    on_cell_focused: rx.EventHandler[_on_cell_event_spec]
 
     # Event handler for cell double click events
-    on_cell_double_clicked: rx.EventHandler[_on_ag_grid_event]
+    on_cell_double_clicked: rx.EventHandler[_on_cell_event_spec]
 
     # Event handler for right click on a cell
-    on_cell_context_menu: rx.EventHandler[_on_ag_grid_event]
+    on_cell_context_menu: rx.EventHandler[_on_cell_event_spec]
 
     # Event handler for row data changed events
     on_cell_value_changed: rx.EventHandler[_on_cell_value_changed]
@@ -355,12 +357,17 @@ class AgGrid(rx.Component):
     # Event handler for selection change events
     on_selection_changed: rx.EventHandler[_on_selection_change_signature]
 
+    # Event handler for column header clicked events
     on_column_header_clicked: rx.EventHandler[_on_column_event_spec]
 
+    # Event handler for column header context menu events
     on_column_header_context_menu: rx.EventHandler[_on_column_event_spec]
 
+    # Event handler for column header focused events
+    on_header_focused: rx.EventHandler[_on_column_event_spec]
+
     # Event handler for first data rendered events
-    on_first_data_rendered: rx.EventHandler[_on_ag_grid_event]
+    on_first_data_rendered: rx.EventHandler[_on_cell_event_spec]
 
     lib_dependencies: list[str] = [
         "ag-grid-community@32.1.0",
