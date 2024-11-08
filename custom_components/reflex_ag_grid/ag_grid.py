@@ -13,11 +13,86 @@ from typing import Literal
 from reflex.components.el import Div
 
 
+def callback_content(iterable: list[str]) -> str:
+    return "; ".join(iterable)
+
+
+def arrow_callback(js_expr: str | list[str]):
+    if isinstance(js_expr, list):
+        js_expr = callback_content(js_expr)
+    return rx.Var(f"(() => {{{js_expr}}})()")
+
+
+def exclude_non_serializable_keys(
+    event: rx.Var,
+    exclude_keys: list[str],
+    log_event: bool = False,
+) -> list[str]:
+    exclude_keys_str = ", ".join(exclude_keys)
+
+    exprs = [
+        f"let {{{exclude_keys_str}, ...rest}} = {event}",
+        "return rest",
+    ]
+
+    if log_event:
+        exprs = [f"console.log({event})", *exprs]
+    return exprs
+
+
 def _on_ag_grid_event(event: rx.Var) -> list[rx.Var]:
     # Remove non-serializable keys from the event object
+    exclude_keys = [
+        "context",
+        "api",
+        "columnApi",
+        "column",
+        "colDef",
+        "node",
+        "event",
+        "eventPath",
+    ]
     return [
-        rx.Var(
-            f"(() => {{let {{context, api, columnApi, column, node, event, eventPath, ...rest}} = {event}; return rest}})()",
+        arrow_callback(
+            exclude_non_serializable_keys(
+                event,
+                exclude_keys,
+                True,
+            )
+        ),
+    ]
+
+
+def _on_row_event_spec(event: rx.Var) -> list[rx.Var]:
+    exclude_keys = ["context", "api", "source", "node", "event", "eventPath"]
+    return [
+        arrow_callback(
+            exclude_non_serializable_keys(
+                event,
+                exclude_keys,
+                True,
+            )
+        ),
+    ]
+
+
+def _on_column_event_spec(event: rx.Var) -> list[rx.Var]:
+    return [
+        arrow_callback(
+            [
+                f"console.log({event})",
+                f"let {{type, column, colDef, api, ...rest}} = {event}",
+                "let columnID = column.colId",
+                "return {type, columnID}",
+            ]
+        ),  # ID of the column being clicked
+    ]
+
+
+def _on_row_selected(event: rx.Var) -> list[rx.Var]:
+    return [
+        arrow_callback(
+            f"let {{type, node, data, rowIndex, ...rest}} = {event}; return {{type, data, rowIndex}}"
         )
     ]
 
@@ -268,8 +343,21 @@ class AgGrid(rx.Component):
     # Event handler for row data changed events
     on_cell_value_changed: rx.EventHandler[_on_cell_value_changed]
 
+    # Event handler for row click events
+    on_row_clicked: rx.EventHandler[_on_row_event_spec]
+
+    # Event handler for row double click events
+    on_row_double_clicked: rx.EventHandler[_on_row_event_spec]
+
+    # Event handler for row selected events
+    on_row_selected: rx.EventHandler[_on_row_selected]
+
     # Event handler for selection change events
     on_selection_changed: rx.EventHandler[_on_selection_change_signature]
+
+    on_column_header_clicked: rx.EventHandler[_on_column_event_spec]
+
+    on_column_header_context_menu: rx.EventHandler[_on_column_event_spec]
 
     # Event handler for first data rendered events
     on_first_data_rendered: rx.EventHandler[_on_ag_grid_event]
