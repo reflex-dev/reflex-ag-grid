@@ -121,7 +121,7 @@ class AgGridAPI(rx.Base):
     def _api(self) -> rx.Var:
         return f"refs['{self.ref}']?.current?.api"
 
-    def __getattr__(self, name: str) -> Callable[[Any], rx.event.EventSpec]:
+    def __getattr__(self, name: str) -> Callable[..., rx.event.EventSpec]:
         def _call_api(*args, **kwargs) -> rx.event.EventSpec:
             """Call the ag-grid API method with the given arguments.
 
