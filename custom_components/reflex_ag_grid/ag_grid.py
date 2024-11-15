@@ -170,6 +170,7 @@ class ColumnDef(PropsBase):
     cell_editor_popup: bool | None = None
     cell_editor_popup_position: str | None = None
     resizable: bool | None = None
+    suppress_span_header_height: bool | None = None
 
 
 class ColumnGroup(PropsBase):
@@ -179,6 +180,7 @@ class ColumnGroup(PropsBase):
     open_by_default: bool | rx.Var[bool] = False
     column_group_show: Literal["open", "closed"] | rx.Var[str] = "open"
     header_name: str | rx.Var[str]
+    header_tooltip: str | rx.Var[str] | None = None
 
 
 class AgGridAPI(rx.Base):
@@ -234,6 +236,9 @@ class AgGrid(rx.Component):
 
     # Variable for row data
     row_data: rx.Var[list[dict[str, Any]]]
+
+    # Variable for cell selection
+    cell_selection: bool | rx.Var[bool] = False
 
     # Variable for row selection type
     row_selection: rx.Var[str] = "single"
@@ -395,7 +400,6 @@ class AgGrid(rx.Component):
         "ag-grid-community@32.1.0",
         "ag-grid-enterprise@32.1.0",
     ]
-
     # Change the aesthetic theme of the grid
     theme: rx.Var[Literal["quartz", "balham", "alpine", "material"]]
 
