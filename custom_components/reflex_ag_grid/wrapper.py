@@ -256,7 +256,7 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
     _selected_items: list[M] = []
     add_dialog_is_open: bool = False
 
-    def _is_authorized(
+    async def _is_authorized(
         self,
         action: ModelWrapperActionType,
         action_data: list[M] | dict[str, Any] | None,
@@ -280,8 +280,8 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
     def on_selection_changed(self, rows, source, type):
         self._selected_items = [self._model_class(**row) for row in rows]
 
-    def on_value_setter(self, row_data: dict[str, Any], field_name: str, value: Any):
-        if not self._is_authorized(
+    async def on_value_setter(self, row_data: dict[str, Any], field_name: str, value: Any):
+        if not await self._is_authorized(
             ModelWrapperActionType.UPDATE, row_data | {field_name: value}
         ):
             return
@@ -298,9 +298,9 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
                 session.commit()
                 return self._grid_component.api.refreshInfiniteCache()
 
-    def on_add(self, row_data: dict[str, Any]):
+    async def on_add(self, row_data: dict[str, Any]):
         """Handles submitting a new row to the model."""
-        if not self._is_authorized(ModelWrapperActionType.INSERT, row_data):
+        if not await self._is_authorized(ModelWrapperActionType.INSERT, row_data):
             return
         with rx.session() as session:
             item = self._model_class(**row_data)
@@ -309,9 +309,9 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
             self.add_dialog_is_open = False
             return self._grid_component.api.refreshInfiniteCache()
 
-    def delete_selected(self):
+    async def delete_selected(self):
         """Handles deleting selected rows from the model."""
-        if not self._is_authorized(ModelWrapperActionType.DELETE, self._selected_items):
+        if not await self._is_authorized(ModelWrapperActionType.DELETE, self._selected_items):
             return
         with rx.session() as session:
             for item in session.exec(
@@ -338,14 +338,14 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
         with rx.session() as session:
             return session.exec(select(func.count(col(self._model_class.id)))).one()
 
-    def _get_data(
+    async def _get_data(
         self,
         start: int,
         end: int,
         filter_model: dict[str, Any] | None = None,
         sort_model: list[dict[str, str]] | None = None,
     ) -> list[M]:
-        if not self._is_authorized(ModelWrapperActionType.SELECT, None):
+        if not await self._is_authorized(ModelWrapperActionType.SELECT, None):
             return []
         with rx.session() as session:
             return session.exec(
