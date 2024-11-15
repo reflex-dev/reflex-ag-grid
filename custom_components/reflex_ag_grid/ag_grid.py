@@ -387,6 +387,12 @@ class AgGrid(rx.Component):
     # Event handler for column header clicked events
     on_column_header_clicked: rx.EventHandler[_on_column_event_spec]
 
+    # Event handler for column resized events
+    on_column_resized: rx.EventHandler[_on_column_event_spec]
+
+    # Event handler for column moved changed events
+    on_column_moved: rx.EventHandler[_on_column_event_spec]
+
     # Event handler for column header context menu events
     on_column_header_context_menu: rx.EventHandler[_on_column_event_spec]
 
