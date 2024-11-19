@@ -69,7 +69,14 @@ class AGEditors(SimpleNamespace):
 
 class AGRenderers(SimpleNamespace):
     link = rx.Var(
-        """function(params) {return jsx("a", {href: params.value}, params.value);}"""
+        """function(params) {return jsx("a", {href: params.value}, params.value);}""",
+        var_data=VarData(
+            imports={
+                "@emotion/react": [
+                    ImportVar(tag="jsx"),
+                ],
+            }
+        ),
     )
 
 
