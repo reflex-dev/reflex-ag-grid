@@ -67,6 +67,12 @@ class AGEditors(SimpleNamespace):
     checkbox = "agCheckboxCellEditor"
 
 
+class AGRenderers(SimpleNamespace):
+    link = rx.Var(
+        """function(params) {return jsx("a", {href: params.value}, params.value);}"""
+    )
+
+
 class ColumnDef(PropsBase):
     field: str | rx.Var[str]
     col_id: str | rx.Var[str] | None = None
@@ -91,6 +97,8 @@ class ColumnDef(PropsBase):
     cell_editor_popup: bool | None = None
     cell_editor_popup_position: str | None = None
     resizable: bool | None = None
+    cell_renderer: rx.Var | None = None
+    flex: int | rx.Var[int] | None = None
 
 
 class ColumnGroup(PropsBase):
@@ -470,6 +478,7 @@ class AgGridNamespace(rx.ComponentNamespace):
     column_group = ColumnGroup
     filters = AGFilters
     editors = AGEditors
+    renderers = AGRenderers
     size_columns_to_fit = size_columns_to_fit
     root = AgGrid.create
     __call__ = WrappedAgGrid.create
