@@ -13,11 +13,89 @@ from typing import Literal
 from reflex.components.el import Div
 
 
-def _on_ag_grid_event(event: rx.Var) -> list[rx.Var]:
+def callback_content(iterable: list[str]) -> str:
+    return "; ".join(iterable)
+
+
+def arrow_callback(js_expr: str | list[str]):
+    if isinstance(js_expr, list):
+        js_expr = callback_content(js_expr)
+    return rx.Var(f"(() => {{{js_expr}}})()")
+
+
+def exclude_non_serializable_keys(
+    event: rx.Var,
+    exclude_keys: list[str],
+    log_event: bool = False,
+) -> list[str]:
+    exclude_keys_str = ", ".join(exclude_keys)
+
+    exprs = [
+        f"let {{{exclude_keys_str}, ...rest}} = {event}",
+        "return rest",
+    ]
+
+    if log_event:
+        exprs = [f"console.log({event})", *exprs]
+    return exprs
+
+
+def _on_cell_event_spec(event: rx.Var) -> list[rx.Var]:
     # Remove non-serializable keys from the event object
+    exclude_keys = [
+        "context",
+        "api",
+        "columnApi",
+        "column",
+        "colDef",
+        "node",
+        "event",
+        "eventPath",
+    ]
     return [
-        rx.Var(
-            f"(() => {{let {{context, api, columnApi, column, node, event, eventPath, ...rest}} = {event}; return rest}})()",
+        arrow_callback(
+            exclude_non_serializable_keys(
+                event,
+                exclude_keys,
+                True,
+            )
+        ),
+    ]
+
+
+def _on_row_event_spec(event: rx.Var) -> list[rx.Var]:
+    exclude_keys = ["context", "api", "source", "node", "event", "eventPath"]
+    return [
+        arrow_callback(
+            exclude_non_serializable_keys(
+                event,
+                exclude_keys,
+                True,
+            )
+        ),
+    ]
+
+
+def _on_column_event_spec(event: rx.Var) -> list[rx.Var]:
+    return [
+        arrow_callback(
+            [
+                f"console.log({event})",
+                f"let {{type, column, colDef, api, ...rest}} = {event}",
+                "let columnID = column.colId",
+                "return {type, columnID}",
+            ]
+        ),  # ID of the column being clicked
+    ]
+
+
+def _on_row_selected(event: rx.Var) -> list[rx.Var]:
+    return [
+        arrow_callback(
+            [
+                f"let {{type, node, data, rowIndex, ...rest}} = {event}",
+                "return {type, data, rowIndex}",
+            ]
         )
     ]
 
@@ -95,13 +173,15 @@ class ColumnDef(PropsBase):
         None
     )
     value_setter: rx.EventChain | rx.Var[rx.EventChain] | None = None
-    value_formatter: rx.Var = None
+    value_formatter: rx.Var | None = None
     wrap_text: bool | None = None
     auto_height: bool | None = None
+    auto_header_height: bool | None = None
     enable_cell_change_flash: bool | None = None
     cell_editor_popup: bool | None = None
     cell_editor_popup_position: str | None = None
     resizable: bool | None = None
+    suppress_span_header_height: bool | None = None
     cell_renderer: rx.Var | None = None
     flex: int | rx.Var[int] | None = None
 
@@ -113,6 +193,7 @@ class ColumnGroup(PropsBase):
     open_by_default: bool | rx.Var[bool] = False
     column_group_show: Literal["open", "closed"] | rx.Var[str] = "open"
     header_name: str | rx.Var[str]
+    header_tooltip: str | rx.Var[str] | None = None
 
 
 class AgGridAPI(rx.Base):
@@ -169,6 +250,9 @@ class AgGrid(rx.Component):
     # Variable for row data
     row_data: rx.Var[list[dict[str, Any]]]
 
+    # Variable for cell selection
+    cell_selection: bool | rx.Var[bool] = False
+
     # Variable for row selection type
     row_selection: rx.Var[str] = "single"
 
@@ -179,61 +263,61 @@ class AgGrid(rx.Component):
     pagination: rx.Var[bool] = False
 
     # Page size for pagination
-    pagination_page_size: rx.Var[int] = 10
+    pagination_page_size: rx.Var[int] = rx.Var.create(10)
 
     # Strategy for auto sizing
-    auto_size_strategy: rx.Var[dict] = {}
+    auto_size_strategy: rx.Var[dict] = rx.Var.create({})
 
     # Selector for pagination page size options
-    pagination_page_size_selector: rx.Var[list[int]] = [10, 25, 50]
+    pagination_page_size_selector: rx.Var[list[int]] = rx.Var.create([10, 25, 50])
 
     # Variable for the side bar configuration
-    side_bar: rx.Var[Union[str, dict[str, Any], bool, list[str]]] = ""
+    side_bar: rx.Var[Union[str, dict[str, Any], bool, list[str]]] = rx.Var.create("")
 
     # Variable to indicate if tree data is used
     tree_data: rx.Var[bool] = rx.Var.create(False)
 
     # Default column definition
-    default_col_def: rx.Var[dict[str, Any]] = {}
+    default_col_def: rx.Var[dict[str, Any]] = rx.Var.create({})
 
     # Definition for the auto group column
-    auto_group_column_def: rx.Var[Any] = {}
+    auto_group_column_def: rx.Var[Any] = rx.Var.create({})
 
     # Data for pinned top rows
-    pinned_top_row_data: rx.Var[list[dict[str, Any]]] = []
+    pinned_top_row_data: rx.Var[list[dict[str, Any]]] = rx.Var.create([])
 
     # Data for pinned bottom rows
-    pinned_bottom_row_data: rx.Var[list[dict[str, Any]]] = []
+    pinned_bottom_row_data: rx.Var[list[dict[str, Any]]] = rx.Var.create([])
 
     # Default expanded group level
-    group_default_expanded: rx.Var[int] | None = -1
+    group_default_expanded: rx.Var[int] | None = rx.Var.create(-1)
 
     # Variable to indicate if group selects children
-    group_selects_children: rx.Var[bool] = False
+    group_selects_children: rx.Var[bool] = rx.Var.create(False)
 
     # Variable to suppress row click selection
-    suppress_row_click_selection: rx.Var[bool] = False
+    suppress_row_click_selection: rx.Var[bool] = rx.Var.create(False)
 
     # Event handler for getting the data path
     get_data_path: rx.EventHandler[lambda e0: [e0]]
 
     # Variable to allow unbalanced groups
-    group_allow_unbalanced: rx.Var[bool] = False
+    group_allow_unbalanced: rx.Var[bool] = rx.Var.create(False)
 
     # Variable to show pivot panel
-    pivot_panel_show: rx.Var[str] = "never"
+    pivot_panel_show: rx.Var[str] = rx.Var.create("never")
 
     # Variable to show row group panel
-    row_group_panel_show: rx.Var[str] = "never"
+    row_group_panel_show: rx.Var[str] = rx.Var.create("never")
 
     # Variable to suppress aggregate function in header
-    suppress_agg_func_in_header: rx.Var[bool] = False
+    suppress_agg_func_in_header: rx.Var[bool] = rx.Var.create(False)
 
     # Variable to lock group columns
-    group_lock_group_columns: rx.Var[int] = 0
+    group_lock_group_columns: rx.Var[int] = rx.Var.create(0)
 
     # Variable to maintain column order
-    maintain_column_order: rx.Var[bool] = False
+    maintain_column_order: rx.Var[bool] = rx.Var.create(False)
 
     # Row model type for infinite/serverside row model
     row_model_type: rx.Var[str]
@@ -281,25 +365,63 @@ class AgGrid(rx.Component):
     get_child_count: rx.EventHandler[lambda e0: [e0]]
 
     # Event handler for cell click events
-    on_cell_clicked: rx.EventHandler[_on_ag_grid_event]
+    on_cell_clicked: rx.EventHandler[_on_cell_event_spec]
+
+    # Event handler for cell focused events
+    on_cell_focused: rx.EventHandler[_on_cell_event_spec]
+
+    # Event handler for cell mouse over events
+    on_cell_mouse_over: rx.EventHandler[_on_cell_event_spec]
+
+    # Event handler for cell mouse out events
+    on_cell_mouse_out: rx.EventHandler[_on_cell_event_spec]
 
     # Event handler for cell double click events
-    on_cell_double_clicked: rx.EventHandler[_on_ag_grid_event]
+    on_cell_double_clicked: rx.EventHandler[_on_cell_event_spec]
+
+    # Event handler for right click on a cell
+    on_cell_context_menu: rx.EventHandler[_on_cell_event_spec]
+
+    # Event handler for row data changed events
+    on_cell_value_changed: rx.EventHandler[_on_cell_value_changed]
+
+    # Event handler for row click events
+    on_row_clicked: rx.EventHandler[_on_row_event_spec]
+
+    # Event handler for row double click events
+    on_row_double_clicked: rx.EventHandler[_on_row_event_spec]
+
+    # Event handler for row selected events
+    on_row_selected: rx.EventHandler[_on_row_selected]
 
     # Event handler for selection change events
     on_selection_changed: rx.EventHandler[_on_selection_change_signature]
 
-    # Event handler for first data rendered events
-    on_first_data_rendered: rx.EventHandler[_on_ag_grid_event]
+    # Event handler for column header clicked events
+    on_column_header_clicked: rx.EventHandler[_on_column_event_spec]
 
-    # Event handler for row data changed events
-    on_cell_value_changed: rx.EventHandler[_on_cell_value_changed]
+    # Event handler for column resized events
+    on_column_resized: rx.EventHandler[_on_column_event_spec]
+
+    # Event handler for column moved events
+    on_column_moved: rx.EventHandler[_on_column_event_spec]
+
+    # Event handler for column pinned events
+    on_column_pinned: rx.EventHandler[_on_column_event_spec]
+
+    # Event handler for column header context menu events
+    on_column_header_context_menu: rx.EventHandler[_on_column_event_spec]
+
+    # Event handler for column header focused events
+    on_header_focused: rx.EventHandler[_on_column_event_spec]
+
+    # Event handler for first data rendered events
+    on_first_data_rendered: rx.EventHandler[_on_cell_event_spec]
 
     lib_dependencies: list[str] = [
         "ag-grid-community@32.1.0",
         "ag-grid-enterprise@32.1.0",
     ]
-
     # Change the aesthetic theme of the grid
     theme: rx.Var[Literal["quartz", "balham", "alpine", "material"]]
 
