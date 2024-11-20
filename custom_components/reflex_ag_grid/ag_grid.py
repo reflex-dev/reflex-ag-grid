@@ -75,7 +75,7 @@ class AGRenderers(SimpleNamespace):
             href=rx.Var("params.value", _var_type=str),
             target="_blank",
         ),
-    ).to(dict)
+    ).to(dict)  # TODO: remove cast after reflex 0.6.6
 
 
 class ColumnDef(PropsBase):
