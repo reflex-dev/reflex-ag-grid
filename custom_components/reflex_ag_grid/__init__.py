@@ -14,6 +14,7 @@ from .handlers import (
 from .wrapper import (
     AbstractWrapper,
     ModelWrapper,
+    ModelWrapperActionType,
     model_wrapper,
 )
 
@@ -21,6 +22,7 @@ __all__ = [
     "AbstractWrapper",
     "Datasource",
     "ModelWrapper",
+    "ModelWrapperActionType",
     "ag_grid",
     "apply_filter_model",
     "apply_sort_model",

@@ -1,6 +1,9 @@
 """ag-grid rx.model wrapper."""
 
+from __future__ import annotations
+
 import datetime
+import enum
 import json
 from typing import Any, ClassVar, Generic, Type
 
@@ -237,16 +240,51 @@ class AbstractWrapper(rx.ComponentState):
         return comp
 
 
+class ModelWrapperActionType(enum.Enum):
+    """ModelWrapper action types."""
+
+    SELECT = "select"
+    INSERT = "insert"
+    UPDATE = "update"
+    DELETE = "delete"
+
+
 class ModelWrapper(AbstractWrapper, Generic[M]):
     """Ag-Grid wrapper for arbitrary rx.Model class."""
 
     _model_class: ClassVar[Type[M] | None] = None
     _selected_items: list[M] = []
+    add_dialog_is_open: bool = False
+
+    async def _is_authorized(
+        self,
+        action: ModelWrapperActionType,
+        action_data: list[M] | dict[str, Any] | None,
+    ) -> bool:
+        """Check if the user is authorized to perform the action.
+
+        For SELECT, action_data is None.
+        For INSERT, action_data is a dictionary of the new row data.
+        For UPDATE, action data is a dictionary of updated row data.
+        For DELETE, action data is a list of model objects to delete.
+
+        Args:
+            action: The action type.
+            action_data: The data associated with the action.
+
+        Returns:
+            True if authorized, False otherwise.
+        """
+        return True
 
     def on_selection_changed(self, rows, source, type):
         self._selected_items = [self._model_class(**row) for row in rows]
 
-    def on_value_setter(self, row_data: dict[str, Any], field_name: str, value: Any):
+    async def on_value_setter(self, row_data: dict[str, Any], field_name: str, value: Any):
+        if not await self._is_authorized(
+            ModelWrapperActionType.UPDATE, row_data | {field_name: value}
+        ):
+            return
         try:
             if self._model_class.__fields__[field_name].type_ == datetime.datetime:
                 value = datetime.datetime.fromisoformat(value)
@@ -259,6 +297,31 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
                 session.add(item_orm)
                 session.commit()
                 return self._grid_component.api.refreshInfiniteCache()
+
+    async def on_add(self, row_data: dict[str, Any]):
+        """Handles submitting a new row to the model."""
+        if not await self._is_authorized(ModelWrapperActionType.INSERT, row_data):
+            return
+        with rx.session() as session:
+            item = self._model_class(**row_data)
+            session.add(item)
+            session.commit()
+            self.add_dialog_is_open = False
+            return self._grid_component.api.refreshInfiniteCache()
+
+    async def delete_selected(self):
+        """Handles deleting selected rows from the model."""
+        if not await self._is_authorized(ModelWrapperActionType.DELETE, self._selected_items):
+            return
+        with rx.session() as session:
+            for item in session.exec(
+                self._model_class.select().where(
+                    self._model_class.id.in_([item.id for item in self._selected_items])
+                )
+            ).all():
+                session.delete(item)
+            session.commit()
+            return self._grid_component.api.refreshInfiniteCache()
 
     def _get_column_defs(self) -> list[ColumnDef]:
         return [
@@ -275,13 +338,15 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
         with rx.session() as session:
             return session.exec(select(func.count(col(self._model_class.id)))).one()
 
-    def _get_data(
+    async def _get_data(
         self,
         start: int,
         end: int,
         filter_model: dict[str, Any] | None = None,
         sort_model: list[dict[str, str]] | None = None,
     ) -> list[M]:
+        if not await self._is_authorized(ModelWrapperActionType.SELECT, None):
+            return []
         with rx.session() as session:
             return session.exec(
                 apply_sort_model(
@@ -297,10 +362,75 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
             ).all()
 
     @classmethod
+    def _add_dialog_field(cls, field: str, ftype: Type) -> rx.Component:
+        comp = rx.input(name=field)
+        orig_type_str = str(ftype)
+        if rx.utils.types.is_optional(ftype):
+            ftype = rx.utils.types.args(ftype)[0]
+        if ftype in (int, float):
+            comp = rx.input(
+                name=field,
+                type="number",
+            )
+        if ftype is bool:
+            comp = rx.checkbox(id=field)
+        return rx.table.row(
+            rx.table.cell(rx.text(field)),
+            rx.table.cell(comp),
+            rx.table.cell(rx.text(f"({orig_type_str})")),
+        )
+
+    @classmethod
+    def _add_dialog(cls) -> rx.Component:
+        """Create the dialog for adding a new row."""
+        return rx.dialog.root(
+            rx.dialog.trigger(
+                rx.icon_button("plus"),
+            ),
+            rx.dialog.content(
+                rx.dialog.title(f"Add new {cls._model_class.__name__}"),
+                rx.form(
+                    rx.table.root(
+                        *[
+                            cls._add_dialog_field(field.name, field.type_)
+                            for field in cls._model_class.__fields__.values()
+                            if field.name != "id"
+                        ]
+                    ),
+                    rx.button("Add", margin="5px"),
+                    on_submit=cls.on_add,
+                ),
+            ),
+            open=cls.add_dialog_is_open,
+            on_open_change=cls.set_add_dialog_is_open,
+        )
+
+    @classmethod
+    def _delete_button(cls) -> rx.Component:
+        """Create the delete button."""
+        return rx.icon_button(
+            "minus",
+            on_click=cls.delete_selected,
+        )
+
+    @classmethod
+    def _top_toolbar(cls) -> rx.Component:
+        """Create the top toolbar."""
+        return rx.hstack(
+            cls._delete_button(),
+            cls._add_dialog(),
+            justify="end",
+            margin="5px",
+        )
+
+    @classmethod
     def create(cls, *children, model_class: Type[M], **props) -> rx.Component:
         comp = super().create(*children, **props)
         comp.State._model_class = model_class
-        return comp
+        return rx.fragment(
+            comp.State._top_toolbar(),
+            comp,
+        )
 
 
 model_wrapper = ModelWrapper.create
