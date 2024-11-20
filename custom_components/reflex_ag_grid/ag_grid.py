@@ -68,16 +68,10 @@ class AGEditors(SimpleNamespace):
 
 
 class AGRenderers(SimpleNamespace):
-    link = rx.Var(
-        """function(params) {return jsx("a", {href: params.value, target: "blank"}, params.value);}""",
-        _var_data=rx.vars.VarData(
-            imports={
-                "@emotion/react": [
-                    rx.ImportVar(tag="jsx"),
-                ],
-            }
-        ),
-    )
+    link = rx.vars.function.ArgsFunctionOperation.create(
+        ("params",),
+        rx.link(rx.Var("params.value"), href=rx.Var("params.value", _var_type=str), target="_blank")
+    ).to(dict)
 
 
 class ColumnDef(PropsBase):
