@@ -280,7 +280,9 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
     def on_selection_changed(self, rows, source, type):
         self._selected_items = [self._model_class(**row) for row in rows]
 
-    async def on_value_setter(self, row_data: dict[str, Any], field_name: str, value: Any):
+    async def on_value_setter(
+        self, row_data: dict[str, Any], field_name: str, value: Any
+    ):
         if not await self._is_authorized(
             ModelWrapperActionType.UPDATE, row_data | {field_name: value}
         ):
@@ -311,7 +313,9 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
 
     async def delete_selected(self):
         """Handles deleting selected rows from the model."""
-        if not await self._is_authorized(ModelWrapperActionType.DELETE, self._selected_items):
+        if not await self._is_authorized(
+            ModelWrapperActionType.DELETE, self._selected_items
+        ):
             return
         with rx.session() as session:
             for item in session.exec(

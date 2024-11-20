@@ -47,7 +47,6 @@ def _on_cell_event_spec(event: rx.Var) -> list[rx.Var]:
         "api",
         "columnApi",
         "column",
-        "colDef",
         "node",
         "event",
         "eventPath",
