@@ -305,7 +305,7 @@ class AgGrid(rx.Component):
     suppress_row_click_selection: rx.Var[bool] = rx.Var.create(False)
 
     # Event handler for getting the data path
-    get_data_path: rx.EventHandler[lambda e0: [e0]]
+    get_data_path: rx.vars.FunctionVar[Any]
 
     # Variable to allow unbalanced groups
     group_allow_unbalanced: rx.Var[bool] = rx.Var.create(False)
@@ -451,8 +451,8 @@ class AgGrid(rx.Component):
 
         # handle hierarchical data
         if data_path_key is not None:
-            props["get_data_path"] = rx.Var(f"(data) => data.{data_path_key}").to(
-                rx.EventChain
+            props["get_data_path"] = rx.vars.FunctionStringVar(
+                f"(data) => data.{data_path_key}"
             )
 
         if is_server_side_group_key is not None:
