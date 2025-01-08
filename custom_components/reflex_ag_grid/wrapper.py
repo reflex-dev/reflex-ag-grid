@@ -434,6 +434,7 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
         return rx.fragment(
             comp.State._top_toolbar(),
             comp,
+            State=comp.State,
         )
 
 
