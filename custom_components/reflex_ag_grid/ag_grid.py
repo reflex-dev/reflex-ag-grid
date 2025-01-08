@@ -187,6 +187,10 @@ class ColumnDef(PropsBase):
     cell_renderer: rx.Var | None = None
     flex: int | rx.Var[int] | None = None
 
+    def dict(self, *args, **kwargs):
+        kwargs.setdefault("exclude_none", True)
+        return super().dict(*args, **kwargs)
+
 
 class ColumnGroup(PropsBase):
     children: list["ColumnDef | ColumnGroup"] | rx.Var[list["ColumnDef | ColumnGroup"]]
