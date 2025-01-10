@@ -1,57 +1,9 @@
-import datetime
-
-import faker
 import reflex as rx
-from sqlmodel import Column, DateTime, Field, func
 
-from reflex_ag_grid.wrapper import model_wrapper, ModelWrapper
+from reflex_ag_grid.wrapper import ModelWrapper
 
-
-class Friend(rx.Model, table=True):
-    name: str
-    age: int
-    years_known: int
-    owes_me: bool = False
-    has_a_dog: bool = False
-    spouse_is_annoying: bool = False
-    met: datetime.datetime = Field(
-        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
-    )
-
-    @classmethod
-    def generate_fakes(cls, n: int) -> list["Friend"]:
-        new_friends = []
-        fake = faker.Faker()
-        for _ in range(n):
-            name = fake.name()
-            age = fake.random_int(min=18, max=80)
-            years_known = fake.random_int(min=0, max=age)
-            new_friends.append(
-                Friend(
-                    name=name,
-                    age=age,
-                    years_known=years_known,
-                    owes_me=fake.pybool(20),
-                    has_a_dog=fake.pybool(60),
-                    spouse_is_annoying=fake.pybool(30),
-                    met=fake.date_time_between(
-                        start_date=f"-{years_known+1}y", end_date=f"-{years_known}y"
-                    ),
-                ),
-            )
-        return new_friends
-
-
-# Basic Example of a ModelWrapper with no customization
-@rx.page("/model")
-def model_page():
-    return rx.box(
-        model_wrapper(
-            model_class=Friend,
-        ),
-        width="100vw",
-        height="100vh",
-    )
+from .common import demo
+from .model_wrapper_simple import Friend
 
 
 # This bogus auth state demonstrates how an extended ModelWrapper can check
@@ -117,7 +69,11 @@ class FriendModelWrapper(ModelWrapper[Friend]):
 
 
 # Advanced example of an extended ModelWrapper with custom behavior
-@rx.page("/model-auth")
+@demo(
+    route="/model-auth",
+    title="Customized ModelWrapper",
+    description="Extended infinite-row ModelWrapper with custom behavior and auth.",
+)
 def model_page_auth():
     grid = FriendModelWrapper.create(
         model_class=Friend,
@@ -141,7 +97,8 @@ def model_page_auth():
         ),
         rx.box(
             grid,
-            width="100vw",
-            height="90vh",
+            width="100%",
+            height="65vh",
+            padding_bottom="60px",  # for scroll bar and controls
         ),
     )
