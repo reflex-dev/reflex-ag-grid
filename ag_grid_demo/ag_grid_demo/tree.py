@@ -3,6 +3,8 @@ import reflex as rx
 
 from reflex_ag_grid import ag_grid
 
+from .common import demo
+
 
 human_size = rx.vars.FunctionStringVar("""
 (params) => {
@@ -204,7 +206,11 @@ class TreeDisplayState(rx.State):
     combine_hosts: rx.Field[bool] = rx.field(True)
 
 
-@rx.page("/tree")
+@demo(
+    route="/tree",
+    title="Tree (enterprise)",
+    description="Use tree data with get_data_path to visualize hierarchical information.",
+)
 def tree_example():
     return rx.box(
         rx.hstack(
@@ -256,6 +262,7 @@ def tree_example():
             # This key causes the grid to re-initialize when `combine_hosts` var changes
             key=f"ag_grid_{TreeDisplayState.combine_hosts}",
         ),
-        width="100vw",
-        height="100vh",
+        width="100%",
+        height="71vh",
+        padding_bottom="25px",  # for scroll bar
     )
