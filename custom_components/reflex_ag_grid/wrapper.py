@@ -7,14 +7,13 @@ import enum
 import json
 from typing import Any, ClassVar, Generic, Type
 
+import reflex as rx
 from fastapi import Request
 from sqlmodel import col, func, select
 
-import reflex as rx
-
-from reflex_ag_grid.ag_grid import ag_grid, ColumnDef
+from reflex_ag_grid.ag_grid import ColumnDef, ag_grid
 from reflex_ag_grid.datasource import Datasource
-from reflex_ag_grid.handlers import apply_filter_model, apply_sort_model, M
+from reflex_ag_grid.handlers import M, apply_filter_model, apply_sort_model
 
 
 def _value_setter_signature(
@@ -41,12 +40,12 @@ def get_default_column_def(
     Returns:
         The column definition.
     """
-    _cdef_kwargs = dict(
-        sortable=True,
-        filter=True,
-        editable=True if value_setter is not None else False,
-        cell_editor=ag_grid.editors.text,
-    )
+    _cdef_kwargs = {
+        "sortable": True,
+        "filter": True,
+        "editable": value_setter is not None,
+        "cell_editor": ag_grid.editors.text,
+    }
     _cdef_kwargs.update(cdef_kwargs)
     cdef = ag_grid.column_def(
         field=field,
@@ -100,17 +99,17 @@ class AbstractWrapper(rx.ComponentState):
         The backend route will call the _get_data method to fetch the data.
         """
         app = rx.utils.prerequisites.get_app().app
-        if cls.__data_route__ in app.api.routes:
+        if cls.__data_route__ in app._api.routes:
             return
 
-        @app.api.get(cls.__data_route__)
+        @app._api.get(cls.__data_route__)
         async def get_data(
             request: Request,
             state: str,
             start: int,
             end: int,
-            filter_model: str = None,
-            sort_model: str = None,
+            filter_model: str | None = None,
+            sort_model: str | None = None,
         ):
             try:
                 token = request.headers["X-Reflex-Client-Token"]
@@ -204,13 +203,13 @@ class AbstractWrapper(rx.ComponentState):
         Returns:
             The Ag-Grid component.
         """
-        _props = dict(
-            id=f"ag-grid-{cls.get_full_name()}",
-            default_col_def={"flex": 1},
-            max_blocks_in_cache=4,
-            cache_block_size=50,
-            group_default_expanded=None,
-        )
+        _props = {
+            "id": f"ag-grid-{cls.get_full_name()}",
+            "default_col_def": {"flex": 1},
+            "max_blocks_in_cache": 4,
+            "cache_block_size": 50,
+            "group_default_expanded": None,
+        }
         _props.update(props)
         return ag_grid.root(
             *children,
@@ -333,7 +332,7 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
                 field=field.name,
                 ftype=field.type_,
                 value_setter=type(self).on_value_setter,
-                editable=True if field.name != "id" else False,
+                editable=field.name != "id",
             )
             for field in self._model_class.__fields__.values()
         ]

@@ -1,9 +1,8 @@
 """Welcome to Reflex! This file showcases the custom component in a basic app."""
 
+import pandas as pd
 import reflex as rx
 from reflex_ag_grid import ag_grid
-import pandas as pd
-
 
 df = pd.read_csv(
     "https://raw.githubusercontent.com/plotly/datasets/master/wind_dataset.csv"
@@ -12,7 +11,7 @@ df = pd.read_csv(
 column_defs = [
     ag_grid.column_def(field="direction"),
     ag_grid.column_def(field="strength"),
-    ag_grid.column_def(field="frequency"),
+    ag_grid.column_def(field="frequency", cell_renderer=ag_grid.renderers.link),
 ]
 
 
@@ -42,8 +41,9 @@ def index():
                 row_data=df.to_dict("records"),
                 column_defs=column_defs,
                 row_selection="multiple",
-                on_selection_changed=lambda rows, _0, _1: BasicGridState.set_selection(
-                    rows
+                on_selection_changed=lambda rows, _0, _1: BasicGridState.setvar(
+                    "selection",
+                    rows,
                 ),
                 width="50vw",
             ),

@@ -2,9 +2,8 @@ import datetime
 
 import faker
 import reflex as rx
+from reflex_ag_grid.wrapper import ModelWrapper, model_wrapper
 from sqlmodel import Column, DateTime, Field, func
-
-from reflex_ag_grid.wrapper import model_wrapper, ModelWrapper
 
 
 class Friend(rx.Model, table=True):

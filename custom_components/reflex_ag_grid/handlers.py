@@ -3,12 +3,11 @@
 import datetime
 from typing import Any, Type, TypeVar
 
-from sqlmodel import not_, and_, or_
-from sqlmodel.sql.expression import SelectOfScalar
+import reflex as rx
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.sql.roles import WhereHavingRole
-
-import reflex as rx
+from sqlmodel import and_, not_, or_
+from sqlmodel.sql.expression import SelectOfScalar
 
 M = TypeVar("M", bound=rx.Model)
 
@@ -32,7 +31,7 @@ def handle_text_filter(value, filter_def) -> bool:
         return not value
     if type == "notBlank":
         return bool(value)
-    assert False, f"type {type} does not exist"
+    raise TypeError(f"type {type} does not exist")
 
 
 def handle_number_filter(value, filter_def) -> bool:
@@ -57,7 +56,7 @@ def handle_number_filter(value, filter_def) -> bool:
     if type == "notBlank":
         return bool(value)
 
-    assert False, f"type {type} does not exist"
+    raise TypeError(f"type {type} does not exist")
 
 
 def handle_filter_def(value, filter_def) -> bool:
@@ -85,13 +84,14 @@ def handle_filter_def(value, filter_def) -> bool:
 def handle_filter_model(row, filter_model) -> bool:
     if not filter_model:
         return True
-    for field, filter_def in filter_model.items():
-        try:
+    field, filter_def = None, None
+    try:
+        for field, filter_def in filter_model.items():
             if not handle_filter_def(row[field], filter_def):
                 return False
-        except Exception as e:
-            print(f"Error filtering {field} of {row}: {e}")
-            return False
+    except Exception as e:
+        print(f"Error filtering {field} of {row}: {e}")  # noqa: T201
+        return False
     return True
 
 
@@ -122,7 +122,7 @@ def where_text_filter(
         return or_(value == None, value == "")  # noqa: E711
     if type == "notBlank":
         return and_(value != None, value != "")  # noqa: E711
-    assert False, f"type {type} does not exist"
+    raise TypeError(f"type {type} does not exist")
 
 
 def where_number_filter(
@@ -160,7 +160,7 @@ def where_number_filter(
     if type == "notBlank":
         return value != None  # noqa: E711
 
-    assert False, f"type {type} does not exist"
+    raise TypeError(f"type {type} does not exist")
 
 
 def where_filter_def(
