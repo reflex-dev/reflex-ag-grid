@@ -18,7 +18,6 @@ jobs:
       - run: |
           pip install pre-commit
           pip install pyright
-          pip install -r requirements.txt
           pre-commit run --all-files
         env:
           SKIP: update-pyi-files
