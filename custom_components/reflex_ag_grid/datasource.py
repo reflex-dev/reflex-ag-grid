@@ -1,5 +1,4 @@
 import reflex as rx
-
 from reflex.base import Base
 from reflex.config import get_config
 from reflex.utils import format
@@ -10,8 +9,8 @@ from reflex.utils.serializers import serialize
 class Datasource(Base):
     uri: str | None = None
     endpoint_uri: str | None = None
-    rowCount: rx.Var[int] | int | None = None
-    getRows: rx.Var | None = None
+    rowCount: rx.Var[int] | int | None = None  # noqa: N815
+    getRows: rx.Var | None = None  # noqa: N815
 
     def get_uri(self) -> str:
         return self.uri or (
@@ -86,7 +85,7 @@ class Datasource(Base):
 class SSRMDatasource(Base):
     uri: str | None = None
     endpoint_uri: str | None = None
-    getRows: rx.Var | None = None
+    getRows: rx.Var | None = None  # noqa: N815
 
     def get_uri(self) -> str:
         return self.uri or (

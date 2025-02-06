@@ -1,0 +1,23 @@
+name: pre-commit
+
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+
+jobs:
+  pre-commit:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.12"
+      - run: |
+          pip install pre-commit
+          pip install pyright
+          pre-commit run --all-files
+        env:
+          SKIP: update-pyi-files

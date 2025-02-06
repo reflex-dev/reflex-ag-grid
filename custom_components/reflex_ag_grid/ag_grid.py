@@ -2,15 +2,15 @@
 
 # For wrapping react guide, visit https://reflex.dev/docs/wrapping-react/overview/
 
-from types import SimpleNamespace
-import reflex as rx
-
 import os
-from typing import Any, Callable, Union
-from .datasource import Datasource, SSRMDatasource
-from reflex.components.props import PropsBase
-from typing import Literal
+from types import SimpleNamespace
+from typing import Any, Callable, Literal, Union
+
+import reflex as rx
 from reflex.components.el import Div
+from reflex.components.props import PropsBase
+
+from .datasource import Datasource, SSRMDatasource
 
 
 def callback_content(iterable: list[str]) -> str:
@@ -152,7 +152,7 @@ class AGRenderers(SimpleNamespace):
             href=rx.Var("params.value", _var_type=str),
             target="_blank",
         ),
-    ).to(dict)  # TODO: remove cast after reflex 0.6.6
+    )
 
 
 class ColumnDef(PropsBase):
@@ -534,7 +534,7 @@ let keys_set = new Set({keys_var});
 api.forEachNode(function (node) {{
     if (keys_set.has(node.key)) {{
         selected_nodes.push(node);
-    }} 
+    }}
 }});
 api.deselectAll()
 api.setNodesSelected({{ nodes: selected_nodes, newValue: true }});
@@ -552,7 +552,7 @@ api.forEachNode(function (node) {{
 """
         )
 
-    def setGridOption(self, key: str, value: rx.Var) -> rx.event.EventSpec:
+    def setGridOption(self, key: str, value: rx.Var) -> rx.event.EventSpec:  # noqa: N802
         return self.api.set_grid_option(key, value)
 
     def set_datasource(self, datasource: Datasource):

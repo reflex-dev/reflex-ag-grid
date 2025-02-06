@@ -31,7 +31,7 @@ __all__ = [
     "handle_number_filter",
     "handle_text_filter",
     "model_wrapper",
+    "where_filter_def",
     "where_number_filter",
     "where_text_filter",
-    "where_filter_def",
 ]
