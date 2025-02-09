@@ -417,9 +417,18 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
         )
 
     @classmethod
+    def _refresh_button(cls) -> rx.Component:
+        """Create the refresh button."""
+        return rx.icon_button(
+            "refresh-cw",
+            on_click=cls._grid_component.api.refreshInfiniteCache,
+        )
+
+    @classmethod
     def _top_toolbar(cls) -> rx.Component:
         """Create the top toolbar."""
         return rx.hstack(
+            cls._refresh_button(),
             cls._delete_button(),
             cls._add_dialog(),
             justify="end",
