@@ -12,7 +12,6 @@ from reflex.components.props import PropsBase
 
 from .datasource import Datasource, SSRMDatasource
 
-
 AG_GRID_VERSION = "32.2.0"
 
 

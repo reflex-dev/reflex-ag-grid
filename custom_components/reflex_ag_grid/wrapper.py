@@ -280,7 +280,10 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
         self._selected_items = [self._model_class(**row) for row in rows]
 
     async def on_value_setter(
-        self, row_data: dict[str, Any], field_name: str, value: Any,
+        self,
+        row_data: dict[str, Any],
+        field_name: str,
+        value: Any,
     ):
         if not await self._is_authorized(
             ModelWrapperActionType.UPDATE, row_data | {field_name: value}

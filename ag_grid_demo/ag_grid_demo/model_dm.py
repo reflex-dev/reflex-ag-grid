@@ -95,7 +95,9 @@ class FriendModelWrapper(ModelWrapper[Friend]):
                 col.sortable = False
         return cols
 
-    async def on_value_setter(self, row_data: dict[str, Any], field_name: str, value: Any):
+    async def on_value_setter(
+        self, row_data: dict[str, Any], field_name: str, value: Any
+    ):
         auth_state = await self.get_state(AuthState)
         if not auth_state.logged_in:
             return  # no modification for logged out users
