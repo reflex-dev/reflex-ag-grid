@@ -13,7 +13,7 @@ from sqlmodel import col, func, select
 import reflex as rx
 
 from reflex_ag_grid.ag_grid import ag_grid, ColumnDef
-from reflex_ag_grid.datasource import Datasource
+from reflex_ag_grid.datasource import SSRMDatasource
 from reflex_ag_grid.handlers import apply_filter_model, apply_sort_model, M
 
 
@@ -87,10 +87,10 @@ class AbstractWrapper(rx.ComponentState):
     __data_route__ = "/abstract-wrapper-data"
     __get_data_kwargs__ = {
         "state": lambda cls: cls.get_full_name(),
-        "start": "${params.startRow}",
-        "end": "${params.endRow}",
-        "sort_model": "${encodeURIComponent(JSON.stringify(params.sortModel))}",
-        "filter_model": "${encodeURIComponent(JSON.stringify(params.filterModel))}",
+        "start": "${params.request.startRow}",
+        "end": "${params.request.endRow}",
+        "sort_model": "${encodeURIComponent(JSON.stringify(params.request.sortModel))}",
+        "filter_model": "${encodeURIComponent(JSON.stringify(params.request.filterModel))}",
     }
 
     @classmethod
@@ -156,8 +156,9 @@ class AbstractWrapper(rx.ComponentState):
             self._grid_component.api.set_grid_option(
                 "columnDefs", self._get_column_defs()
             ),
-            self._grid_component.set_datasource(
-                Datasource(
+            self._grid_component.api.set_grid_option(
+                "serverSideDatasource",
+                SSRMDatasource(
                     uri=self._get_datasource_uri(),
                     rowCount=self._row_count(),
                 ),
@@ -214,7 +215,7 @@ class AbstractWrapper(rx.ComponentState):
         _props.update(props)
         return ag_grid.root(
             *children,
-            row_model_type="infinite",
+            row_model_type="serverSide",
             on_mount=cls.on_mount,
             on_selection_changed=cls.on_selection_changed,
             **_props,
@@ -431,11 +432,13 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
     def create(cls, *children, model_class: Type[M], **props) -> rx.Component:
         comp = super().create(*children, **props)
         comp.State._model_class = model_class
-        return rx.fragment(
+        frag = rx.fragment(
             comp.State._top_toolbar(),
             comp,
             State=comp.State,
         )
+        frag.api = comp.api
+        return frag
 
 
 model_wrapper = ModelWrapper.create

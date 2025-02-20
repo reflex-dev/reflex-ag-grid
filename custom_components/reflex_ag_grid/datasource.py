@@ -41,10 +41,8 @@ class Datasource(Base):
 """
             % uri
         )
-        return rx.Var.create_safe(
+        return rx.Var(
             js_func.replace("\n", ""),
-            _var_is_local=False,
-            _var_is_string=False,
             _var_data=rx.vars.VarData(
                 imports={
                     "/utils/state": [
@@ -83,11 +81,7 @@ class Datasource(Base):
         )
 
 
-class SSRMDatasource(Base):
-    uri: str | None = None
-    endpoint_uri: str | None = None
-    getRows: rx.Var | None = None
-
+class SSRMDatasource(Datasource):
     def get_uri(self) -> str:
         return self.uri or (
             f"{self.endpoint_uri}?"
@@ -110,20 +104,26 @@ class SSRMDatasource(Base):
     fetch(%s, {
         headers: {"X-Reflex-Client-Token": token},
     })
-    .then((response) => response.json()
-        .then((data) => {
-            params.success(data)
+    .then(async (response) => {
+        if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`${response.status} ${response.statusText}: ${text}`)
+        }
+        response.json().then((data) => {
+            params.success({rowData: data})
         })
-    )
-    .catch((error) => params.fail())
+    })
+    .catch((error) => {
+        console.log(error);
+        params.parentNode.failReason = error.message;
+        params.fail()
+    })
 }
 """
             % uri
         )
-        return rx.Var.create_safe(
+        return rx.Var(
             js_func.replace("\n", ""),
-            _var_is_local=False,
-            _var_is_string=False,
             _var_data=rx.vars.VarData(
                 imports={
                     "/utils/state": [
@@ -132,24 +132,4 @@ class SSRMDatasource(Base):
                     ],
                 }
             ),
-        )
-
-    def json(self) -> str:
-        """Convert the object to a json-like string.
-
-        Vars will be unwrapped so they can represent actual JS var names and functions.
-
-        Keys will be converted to camelCase.
-
-        Returns:
-            The object as a Javascript Object literal.
-        """
-        d = self.dict(exclude={"uri"})
-        if self.getRows is None:
-            d["getRows"] = self._get_rows_function()
-        return format.unwrap_vars(
-            self.__config__.json_dumps(
-                {format.to_camel_case(key): value for key, value in d.items()},
-                default=serialize,
-            )
         )

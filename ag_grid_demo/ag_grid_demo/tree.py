@@ -1,3 +1,4 @@
+import json
 from typing import Any
 import reflex as rx
 
@@ -206,6 +207,21 @@ class TreeDisplayState(rx.State):
     combine_hosts: rx.Field[bool] = rx.field(True)
 
 
+class GridState(rx.State):
+    column_state_json: str = rx.LocalStorage()
+
+    @rx.event
+    def save_column_state(self, state: list):
+        self.column_state_json = json.dumps(state)
+
+    @rx.var
+    def column_state(self) -> list:
+        try:
+            return json.loads(self.column_state_json)
+        except ValueError:
+            return []
+
+
 @demo(
     route="/tree",
     title="Tree (enterprise)",
@@ -218,6 +234,15 @@ def tree_example():
             rx.switch(
                 checked=TreeDisplayState.combine_hosts,
                 on_change=TreeDisplayState.set_combine_hosts,
+            ),
+            rx.button(
+                "Save column state",
+                on_click=ag_grid.api("ag_grid_tree_1").get_column_state(callback=GridState.save_column_state),
+            ),
+            rx.button(
+                "Load column state",
+                on_click=ag_grid.api("ag_grid_tree_1").apply_column_state({"state": GridState.column_state, "applyOrder": True}),
+                disabled=GridState.column_state.length() == 0,
             ),
             align="center",
         ),

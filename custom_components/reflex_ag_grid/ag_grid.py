@@ -13,7 +13,7 @@ from typing import Literal
 from reflex.components.el import Div
 
 
-AG_GRID_VERSION = "32.1.0"
+AG_GRID_VERSION = "32.2.0"
 
 
 def callback_content(iterable: list[str]) -> str:
@@ -232,12 +232,13 @@ class AgGridAPI(rx.Base):
             Returns:
                 rx.event.EventSpec: The event specification.
             """
-            var_args = [str(rx.Var.create(arg)) for arg in args]
+            func = rx.vars.FunctionStringVar(
+                f"{self._api}.{rx.utils.format.to_camel_case(name)}",
+            )
             return rx.call_script(
-                f"{self._api}.{rx.utils.format.to_camel_case(name)}({', '.join(var_args)})",
+                func(*args),
                 **kwargs,
             )
-
         return _call_api
 
 
@@ -366,6 +367,9 @@ class AgGrid(rx.Component):
 
     # Variable to enable client-side sort on server-side
     server_side_enable_client_side_sort: rx.Var[bool] = False
+
+    # Custom loading indicator for infinite/server-side row models
+    # loading_cell_renderer: rx.Var[Any]
 
     # Event handler to get the child count
     get_child_count: rx.EventHandler[lambda e0: [e0]]

@@ -1,4 +1,8 @@
+import asyncio
+import json
 import reflex as rx
+
+from fastapi import HTTPException
 
 from reflex_ag_grid.wrapper import ModelWrapper
 
@@ -12,7 +16,7 @@ class AuthState(rx.State):
     _logged_in: bool = False
 
     @rx.var(cache=True)
-    def logged_in(self):
+    def logged_in(self) -> bool:
         return self._logged_in
 
     def toggle_login(self):
@@ -36,6 +40,20 @@ class AuthState(rx.State):
         ]
 
 
+class GridState(rx.State):
+    column_state_json: str = rx.LocalStorage()
+
+    @rx.event
+    def save_column_state(self, state: list):
+        self.column_state_json = json.dumps(state)
+
+    @rx.var
+    def column_state(self) -> list:
+        try:
+            return json.loads(self.column_state_json)
+        except ValueError:
+            return []
+
 # When extending a ModelWrapper, you can override methods to customize the behavior.
 class FriendModelWrapper(ModelWrapper[Friend]):
     def _get_column_defs(self):
@@ -57,9 +75,13 @@ class FriendModelWrapper(ModelWrapper[Friend]):
         auth_state = await self.get_state(AuthState)
         if not auth_state.logged_in:
             return []  # no records for logged out users
-        return await super()._get_data(
-            start, end, filter_model=filter_model, sort_model=sort_model
-        )
+        await asyncio.sleep(0.2)
+        if end < 150:
+            return await super()._get_data(
+                start, end, filter_model=filter_model, sort_model=sort_model
+            )
+        else:
+            raise HTTPException(status_code=400, detail="Too many rows requested.")
 
     @rx.var(cache=True)
     def selected_items(self) -> list[Friend]:
@@ -78,6 +100,21 @@ def model_page_auth():
     grid = FriendModelWrapper.create(
         model_class=Friend,
         row_selection="multiple",
+        custom_attrs={
+            "loading_cell_renderer": rx.vars.function.ArgsFunctionOperation.create(
+                args_names=("params",),
+                return_expr=rx.Var.create(
+                    rx.box(
+                        rx.cond(
+                            rx.Var("params.node.failedLoad"),
+                            rx.hstack(rx.icon("x"), rx.text("Failed to load rows: ", rx.Var("params.node.parent.failReason"), align="center")),
+                            rx.hstack(rx.spinner(), rx.text("Loading rows..."), align="center"),
+                        ),
+                        padding_x="5px",
+                    ),
+                ),
+            ),
+        }
     )
     return rx.vstack(
         rx.hstack(
@@ -93,6 +130,15 @@ def model_page_auth():
             rx.foreach(
                 grid.State.selected_items,
                 lambda friend: rx.badge(friend.name),
+            ),
+            rx.spacer(),
+            rx.button(
+                "Save column state",
+                on_click=grid.api.get_column_state(callback=GridState.save_column_state),
+            ),
+            rx.button(
+                "Load column state",
+                on_click=grid.api.apply_column_state({"state": GridState.column_state}),
             ),
         ),
         rx.box(
