@@ -18,7 +18,7 @@ from reflex_ag_grid.handlers import M, apply_filter_model, apply_sort_model
 
 def _value_setter_signature(
     params: rx.Var[dict[str, Any]],
-) -> tuple[rx.Var[int], rx.Var[str], rx.Var[Any]]:
+) -> tuple[rx.Var[dict[str, Any]], rx.Var[str], rx.Var[Any]]:
     return (
         params["data"],
         params["colDef"].to(dict)["field"],
@@ -280,7 +280,7 @@ class ModelWrapper(AbstractWrapper, Generic[M]):
         self._selected_items = [self._model_class(**row) for row in rows]
 
     async def on_value_setter(
-        self, row_data: dict[str, Any], field_name: str, value: Any
+        self, row_data: dict[str, Any], field_name: str, value: Any,
     ):
         if not await self._is_authorized(
             ModelWrapperActionType.UPDATE, row_data | {field_name: value}

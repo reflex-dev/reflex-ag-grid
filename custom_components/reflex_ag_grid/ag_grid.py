@@ -13,7 +13,7 @@ from reflex.components.props import PropsBase
 from .datasource import Datasource, SSRMDatasource
 
 
-AG_GRID_VERSION = "32.1.0"
+AG_GRID_VERSION = "32.2.0"
 
 
 def callback_content(iterable: list[str]) -> str:
@@ -152,7 +152,7 @@ class AGRenderers(SimpleNamespace):
         ("params",),
         rx.link(
             rx.Var("params.value"),
-            href=rx.Var("params.value", _var_type=str),
+            href=rx.Var("params.value?.toString()", _var_type=str),
             target="_blank",
         ),
     )
