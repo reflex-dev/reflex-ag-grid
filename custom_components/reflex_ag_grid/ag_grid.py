@@ -13,7 +13,7 @@ from typing import Literal
 from reflex.components.el import Div
 
 
-AG_GRID_VERSION = "32.1.0"
+AG_GRID_VERSION = "32.2.0"
 
 
 def callback_content(iterable: list[str]) -> str:
