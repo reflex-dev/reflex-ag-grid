@@ -110,6 +110,9 @@ def _on_cell_value_changed(event: rx.Var) -> list[rx.Var]:
         rx.Var(
             f"(() => {{let {{newValue, ...rest}} = {event}; return newValue}})()"
         ),  # new value
+        rx.Var(
+            f"(() => {{let {{node, ...rest}} = {event}; return node.id}})()"
+        ),  # id of the row being changed
     ]
 
 
