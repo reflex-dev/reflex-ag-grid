@@ -1,5 +1,6 @@
-This component is no longer maintained.
-For the AG Grid maintained by the Reflex team, please use https://enterprise.reflex.dev/ag-grid from now on.
+> [!WARNING]  
+> This component is no longer maintained.
+> For the AG Grid maintained by the Reflex team, please use https://enterprise.reflex.dev/ag-grid from now on.
 
 # AGGrid for Reflex
 
