@@ -13,6 +13,9 @@ from reflex.components.props import PropsBase
 from .datasource import Datasource, SSRMDatasource
 
 
+AG_GRID_VERSION = "32.2.0"
+
+
 def callback_content(iterable: list[str]) -> str:
     return "; ".join(iterable)
 
@@ -184,6 +187,10 @@ class ColumnDef(PropsBase):
     cell_renderer: rx.Var | None = None
     flex: int | rx.Var[int] | None = None
 
+    def dict(self, *args, **kwargs):
+        kwargs.setdefault("exclude_none", True)
+        return super().dict(*args, **kwargs)
+
 
 class ColumnGroup(PropsBase):
     children: list["ColumnDef | ColumnGroup"] | rx.Var[list["ColumnDef | ColumnGroup"]]
@@ -238,7 +245,7 @@ class AgGrid(rx.Component):
     """Reflex AgGrid component is a high-performance and highly customizable component that wraps AG Grid, designed for creating rich datagrids."""
 
     # The library name for the ag-grid-react component
-    library: str = "ag-grid-react@32.1.0"
+    library: str = f"ag-grid-react@{AG_GRID_VERSION}"
 
     # The tag name for the AgGridReact component
     tag: str = "AgGridReact"
@@ -298,7 +305,7 @@ class AgGrid(rx.Component):
     suppress_row_click_selection: rx.Var[bool] = rx.Var.create(False)
 
     # Event handler for getting the data path
-    get_data_path: rx.EventHandler[lambda e0: [e0]]
+    get_data_path: rx.vars.FunctionVar[Any]
 
     # Variable to allow unbalanced groups
     group_allow_unbalanced: rx.Var[bool] = rx.Var.create(False)
@@ -418,8 +425,8 @@ class AgGrid(rx.Component):
     on_first_data_rendered: rx.EventHandler[_on_cell_event_spec]
 
     lib_dependencies: list[str] = [
-        "ag-grid-community@32.1.0",
-        "ag-grid-enterprise@32.1.0",
+        f"ag-grid-community@{AG_GRID_VERSION}",
+        f"ag-grid-enterprise@{AG_GRID_VERSION}",
     ]
     # Change the aesthetic theme of the grid
     theme: rx.Var[Literal["quartz", "balham", "alpine", "material"]]
@@ -444,8 +451,8 @@ class AgGrid(rx.Component):
 
         # handle hierarchical data
         if data_path_key is not None:
-            props["get_data_path"] = rx.Var(f"(data) => data.{data_path_key}").to(
-                rx.EventChain
+            props["get_data_path"] = rx.vars.FunctionStringVar(
+                f"(data) => data.{data_path_key}"
             )
 
         if is_server_side_group_key is not None:
@@ -501,7 +508,7 @@ class AgGrid(rx.Component):
                 "ag-grid-enterprise",
             ],
             "d3-format": ["format"],
-            "ag-grid-enterprise": [
+            f"ag-grid-enterprise@{AG_GRID_VERSION}": [
                 "LicenseManager",
             ],
         }

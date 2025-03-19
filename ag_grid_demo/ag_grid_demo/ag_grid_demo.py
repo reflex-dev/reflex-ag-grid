@@ -53,6 +53,7 @@ def index():
                 rx.link("Customized ModelWrapper", href="/model-auth"),
                 " (Generate data)",
             ),
+            rx.link("Tree (enterprise)", href="/tree"),
         ),
         rx.vstack(
             rx.heading("Selected Items"),

@@ -104,7 +104,7 @@ class FriendModelWrapper(ModelWrapper[Friend]):
         auth_state = await self.get_state(AuthState)
         if not auth_state.logged_in:
             return []  # no records for logged out users
-        return super()._get_data(
+        return await super()._get_data(
             start, end, filter_model=filter_model, sort_model=sort_model
         )
 
