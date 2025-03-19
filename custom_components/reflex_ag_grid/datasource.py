@@ -40,10 +40,8 @@ class Datasource(Base):
 """
             % uri
         )
-        return rx.Var.create_safe(
+        return rx.Var(
             js_func.replace("\n", ""),
-            _var_is_local=False,
-            _var_is_string=False,
             _var_data=rx.vars.VarData(
                 imports={
                     "/utils/state": [
@@ -119,10 +117,8 @@ class SSRMDatasource(Base):
 """
             % uri
         )
-        return rx.Var.create_safe(
+        return rx.Var(
             js_func.replace("\n", ""),
-            _var_is_local=False,
-            _var_is_string=False,
             _var_data=rx.vars.VarData(
                 imports={
                     "/utils/state": [

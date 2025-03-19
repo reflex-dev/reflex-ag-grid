@@ -1,4 +1,5 @@
 import datetime
+from typing import Any
 
 import faker
 import reflex as rx
@@ -59,7 +60,7 @@ class AuthState(rx.State):
     _logged_in: bool = False
 
     @rx.var(cache=True)
-    def logged_in(self):
+    def logged_in(self) -> bool:
         return self._logged_in
 
     def toggle_login(self):
@@ -94,7 +95,9 @@ class FriendModelWrapper(ModelWrapper[Friend]):
                 col.sortable = False
         return cols
 
-    async def on_value_setter(self, row_data, field_name, value):
+    async def on_value_setter(
+        self, row_data: dict[str, Any], field_name: str, value: Any
+    ):
         auth_state = await self.get_state(AuthState)
         if not auth_state.logged_in:
             return  # no modification for logged out users
@@ -104,7 +107,7 @@ class FriendModelWrapper(ModelWrapper[Friend]):
         auth_state = await self.get_state(AuthState)
         if not auth_state.logged_in:
             return []  # no records for logged out users
-        return super()._get_data(
+        return await super()._get_data(
             start, end, filter_model=filter_model, sort_model=sort_model
         )
 
